@@ -228,46 +228,46 @@ function App() {
 
       {/* Main Chat Area with Enhanced Responsive Design */}
       <main className="flex-1 flex flex-col overflow-hidden relative">
-        {/* Mobile Header - Only visible on mobile */}
-        <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between relative z-50 sticky top-0 mobile-header-sticky">
-          <div className="flex items-center space-x-3">
+        {/* Mobile Header - Enhanced for Better UX */}
+        <div className="md:hidden bg-white/95 backdrop-blur-md border-b border-gray-200 px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between relative z-50 sticky top-0 mobile-header-sticky shadow-sm">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             <button
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Button clicked!');
                 toggleSidebar();
               }}
-              className="p-3 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-all touch-button bg-blue-50 border border-blue-200"
+              className="p-2.5 sm:p-3 text-gray-600 hover:text-gray-800 hover:bg-gray-100/80 rounded-xl transition-all touch-button bg-blue-50/80 border border-blue-200/50 backdrop-blur-sm active:scale-95"
               style={{ minWidth: '44px', minHeight: '44px' }}
               aria-label="Toggle sidebar"
               type="button"
             >
-              <i className="fas fa-bars text-lg"></i>
+              <i className="fas fa-bars text-base sm:text-lg"></i>
             </button>
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center">
-                <i className="fas fa-mosque text-white text-sm"></i>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-md">
+                <i className="fas fa-mosque text-white text-xs sm:text-sm"></i>
               </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-800">IslamicAI</h1>
-                <p className="text-xs text-gray-500">Scholar Assistant</p>
+                <h1 className="text-base sm:text-lg font-bold text-gray-800 leading-tight">IslamicAI</h1>
+                <p className="text-xs text-gray-500 hidden sm:block leading-tight">Scholar Assistant</p>
               </div>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1 sm:space-x-2">
             <button
               onClick={startNewChat}
-              className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all"
+              className="p-2 sm:p-2.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50/80 rounded-xl transition-all touch-button active:scale-95"
+              style={{ minWidth: '44px', minHeight: '44px' }}
               title="New Chat"
             >
-              <i className="fas fa-plus text-lg"></i>
+              <i className="fas fa-plus text-base sm:text-lg"></i>
             </button>
           </div>
         </div>
 
         {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0 opacity-5 pointer-events-none">
           <div className="w-full h-full bg-gradient-to-br from-blue-50/30 to-indigo-50/30"></div>
         </div>
         

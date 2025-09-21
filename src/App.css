@@ -570,17 +570,31 @@ body {
 
 /* Comprehensive Mobile Responsive Design */
 @media (max-width: 768px) {
+  /* Enhanced Mobile Performance Optimizations */
+@media (max-width: 768px) {
+  /* GPU Acceleration for Mobile */
+  .mobile-gpu-acceleration {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    will-change: transform;
+  }
+  
   /* Mobile Layout Adjustments */
   .mobile-header {
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
   
-  /* Mobile Sidebar */
+  /* Enhanced Mobile Sidebar Performance */
   .mobile-sidebar {
     width: 100vw;
     max-width: 320px;
+    will-change: transform;
+    transform: translateZ(0);
   }
   
   /* Mobile Sidebar Fix */
@@ -591,13 +605,15 @@ body {
     height: 100vh;
     z-index: 50;
     transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
   }
   
   .sidebar-mobile.open {
     transform: translateX(0);
   }
   
+  /* Enhanced Mobile Overlay */
   .sidebar-overlay {
     position: fixed;
     top: 0;
@@ -608,13 +624,67 @@ body {
     z-index: 40;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
   }
   
   .sidebar-overlay.open {
     opacity: 1;
     visibility: visible;
   }
+  
+  /* Mobile Input Optimizations */
+  .mobile-input-optimized {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    -webkit-appearance: none;
+    border-radius: 0;
+    transform: translateZ(0); /* GPU acceleration */
+  }
+  
+  /* Enhanced Mobile Message Bubbles */
+  .mobile-message {
+    margin-bottom: 0.75rem;
+    padding: 0 0.5rem;
+    will-change: transform;
+  }
+  
+  .mobile-message .message-content {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  
+  /* Mobile Input Area Enhancement */
+  .mobile-input-area {
+    padding: 0.75rem;
+    position: sticky;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(229, 231, 235, 0.8);
+    z-index: 10;
+  }
+  
+  /* Mobile Footer Optimization */
+  .mobile-footer {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+    padding: 0.75rem 0;
+  }
+  
+  .mobile-footer > div {
+    justify-content: center;
+  }
+  
+  /* Mobile Animation Performance */
+  .mobile-animate {
+    animation-duration: 0.3s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
   
   /* Desktop Sidebar - Normal behavior */
   @media (min-width: 769px) {
@@ -781,30 +851,48 @@ body {
   }
 }
 
-/* Mobile Touch Improvements */
+/* Enhanced Mobile Touch Improvements */
 @media (hover: none) and (pointer: coarse) {
   /* Touch-friendly buttons */
   .touch-button {
     min-height: 44px;
     min-width: 44px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
   
   /* Touch-friendly input */
   .touch-input {
     min-height: 44px;
-    font-size: 16px; /* Prevents zoom on iOS */
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    -webkit-appearance: none;
+    border-radius: 0;
   }
   
   /* Touch-friendly sidebar */
   .touch-sidebar {
     width: 100vw;
     max-width: 320px;
+    touch-action: pan-y;
   }
   
   /* Touch-friendly message bubbles */
   .touch-message {
     padding: 0.75rem;
     margin-bottom: 1rem;
+    touch-action: pan-y;
+  }
+  
+  /* Enhanced touch feedback */
+  .touch-button:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+  
+  /* Improved scroll performance */
+  .touch-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 }
 

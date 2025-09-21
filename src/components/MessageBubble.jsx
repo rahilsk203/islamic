@@ -68,25 +68,25 @@ const MessageBubble = ({ message, isStreaming = false }) => {
 
   if (isWelcomeMessage) {
     return (
-      <div className="flex justify-start mb-4 px-2 sm:px-0">
-        <div className="flex flex-row max-w-2xl w-full">
-          {/* Avatar */}
-          <div className="mx-1 sm:mx-2 flex-shrink-0 mr-1 sm:mr-2 ml-0">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-green-500 to-green-600">
+      <div className="flex justify-start mb-3 sm:mb-4 px-1 sm:px-2">
+        <div className="flex flex-row max-w-full w-full">
+          {/* Avatar - Mobile Optimized */}
+          <div className="mx-1 sm:mx-2 flex-shrink-0 mr-2 sm:mr-3">
+            <div className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-green-500 to-green-600">
               <i className="text-white text-xs fas fa-robot"></i>
             </div>
           </div>
           
-          {/* Simple Welcome Message */}
+          {/* Simple Welcome Message - Mobile Enhanced */}
           <div className="flex flex-col items-start flex-1 min-w-0">
             <div className="flex items-center space-x-2 mb-1">
               <span className="text-xs font-semibold text-emerald-600">IslamicAI</span>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-gray-400 hidden sm:inline">
                 {formatTimestamp(message.timestamp)}
               </span>
             </div>
             
-            <div className="relative">
+            <div className="relative w-full">
               <div className="relative rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3 max-w-full break-words bg-white border border-gray-200 rounded-bl-sm shadow-sm">
                 <div className="whitespace-pre-wrap leading-relaxed text-sm sm:text-base text-gray-800">
                   {formatContent(message.content)}
@@ -100,11 +100,11 @@ const MessageBubble = ({ message, isStreaming = false }) => {
   }
 
   return (
-    <div className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} mb-4 px-2 sm:px-0`}>
-      <div className={`flex ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'} max-w-2xl w-full`}>
-        {/* Avatar */}
-        <div className={`mx-1 sm:mx-2 flex-shrink-0 ${message.sender === 'user' ? 'ml-1 sm:ml-2 mr-0' : 'mr-1 sm:mr-2 ml-0'}`}>
-          <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center ${
+    <div className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} mb-3 sm:mb-4 px-1 sm:px-2`}>
+      <div className={`flex ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'} max-w-[90%] sm:max-w-[85%] lg:max-w-2xl w-full`}>
+        {/* Avatar - Mobile Optimized */}
+        <div className={`mx-1 sm:mx-2 flex-shrink-0 ${message.sender === 'user' ? 'ml-2 sm:ml-3' : 'mr-2 sm:mr-3'}`}>
+          <div className={`w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 rounded-full flex items-center justify-center ${
             message.sender === 'user' 
               ? 'bg-gradient-to-br from-blue-500 to-blue-600' 
               : 'bg-gradient-to-br from-green-500 to-green-600'
@@ -113,7 +113,7 @@ const MessageBubble = ({ message, isStreaming = false }) => {
           </div>
         </div>
         
-        {/* Message Content */}
+        {/* Message Content - Enhanced Mobile Layout */}
         <div className={`flex flex-col ${message.sender === 'user' ? 'items-end' : 'items-start'} flex-1 min-w-0`}>
           <div className="flex items-center space-x-2 mb-1">
             {message.sender === 'ai' ? (
@@ -121,17 +121,17 @@ const MessageBubble = ({ message, isStreaming = false }) => {
             ) : (
               <span className="text-xs font-medium text-gray-500">You</span>
             )}
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-gray-400 hidden sm:inline">
               {formatTimestamp(message.timestamp)}
             </span>
           </div>
           
-          <div className="relative">
+          <div className="relative w-full">
             <div 
-              className={`relative rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3 max-w-full break-words ${
+              className={`relative rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3 max-w-full break-words transition-all duration-200 ${
                 message.sender === 'user'
-                  ? 'bg-blue-500 text-white rounded-br-sm shadow-md'
-                  : 'bg-white border border-gray-200 rounded-bl-sm shadow-md'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-sm shadow-md hover:shadow-lg'
+                  : 'bg-white/95 border border-gray-200 rounded-bl-sm shadow-md hover:shadow-lg backdrop-blur-sm'
               }`}
             >
               <div ref={contentRef} className={`whitespace-pre-wrap leading-relaxed text-sm sm:text-base ${
@@ -153,9 +153,9 @@ const MessageBubble = ({ message, isStreaming = false }) => {
                       <span className="ml-1 animate-pulse text-emerald-500 font-bold">▌</span>
                     )}
                     
-                    {/* Simple completion indicator for AI messages */}
+                    {/* Simple completion indicator for AI messages - Mobile Hidden */}
                     {message.sender === 'ai' && !isStreaming && !message.isStreaming && displayedContent && (
-                      <div className="mt-2 text-xs text-gray-400 text-right">
+                      <div className="mt-2 text-xs text-gray-400 text-right hidden sm:block">
                         ✓
                       </div>
                     )}

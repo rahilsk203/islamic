@@ -53,42 +53,58 @@ const Sidebar = ({ isOpen, toggleSidebar, recentChats, startNewChat, loadChatSes
     return getRelativeTime(dateString);
   };
 
+  const handlePromptClick = (prompt) => {
+    // This function should trigger sending the prompt as a message
+    // We'll need to add this functionality or connect it to the parent component
+    console.log('Prompt clicked:', prompt);
+    // Close sidebar on mobile after selecting prompt
+    if (window.innerWidth < 768) {
+      toggleSidebar();
+    }
+  };
+
   return (
     <>
-      {/* Enhanced Sidebar Overlay */}
+      {/* Enhanced Mobile Sidebar Overlay */}
       <div 
-        className={`sidebar-overlay md:hidden ${isOpen ? 'open' : ''}`}
+        className={`sidebar-overlay md:hidden fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 backdrop-blur-sm ${
+          isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
+        }`}
         onClick={toggleSidebar}
+        style={{ touchAction: 'none' }}
       ></div>
 
-      {/* Modern Sidebar */}
+      {/* Enhanced Mobile-First Sidebar */}
       <aside 
-        className={`bg-white shadow-lg border-r border-gray-200 w-72 sm:w-80 flex-shrink-0 transform transition-all duration-300 ease-in-out z-50
+        className={`bg-white/95 backdrop-blur-md shadow-xl border-r border-gray-200/50 w-80 sm:w-72 lg:w-80 flex-shrink-0 transform transition-all duration-300 ease-in-out z-50 will-change-transform
           ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
-          md:translate-x-0 md:static fixed inset-y-0 left-0 sidebar-mobile ${isOpen ? 'open' : ''}`}
+          md:translate-x-0 md:static fixed inset-y-0 left-0 safe-area-inset-left`}
+        style={{ touchAction: 'pan-y' }}
       >
         <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="p-4 border-b border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center">
-                  <i className="fas fa-mosque text-white text-sm"></i>
+          {/* Enhanced Mobile Header */}
+          <div className="p-3 sm:p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center">
+                  <i className="fas fa-mosque text-white text-xs sm:text-sm"></i>
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-gray-800">IslamicAI</h2>
-                  <p className="text-xs text-gray-500">Scholar Assistant</p>
+                  <h2 className="text-base sm:text-lg font-bold text-gray-800">IslamicAI</h2>
+                  <p className="text-xs text-gray-500 hidden sm:block">Scholar Assistant</p>
                 </div>
               </div>
               <button 
                 onClick={toggleSidebar}
-                className="md:hidden p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
+                className="md:hidden p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all touch-manipulation"
+                style={{ minWidth: '44px', minHeight: '44px' }}
+                aria-label="Close sidebar"
               >
                 <i className="fas fa-times"></i>
               </button>
             </div>
             
-            {/* Navigation Tabs */}
+            {/* Enhanced Mobile Navigation Tabs */}
             <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
               {[
                 { id: 'chats', label: 'Chats', icon: 'fas fa-comments' },
@@ -98,39 +114,42 @@ const Sidebar = ({ isOpen, toggleSidebar, recentChats, startNewChat, loadChatSes
                 <button
                   key={tab.id}
                   onClick={() => setActiveSection(tab.id)}
-                  className={`flex-1 flex items-center justify-center space-x-1 px-2 py-2 rounded-md text-xs font-medium transition-all duration-200 ${
+                  className={`flex-1 flex items-center justify-center space-x-1 px-2 py-2.5 rounded-md text-xs font-medium transition-all duration-200 touch-manipulation ${
                     activeSection === tab.id
                       ? 'bg-white text-blue-600 shadow-sm'
                       : 'text-gray-600 hover:text-gray-800'
                   }`}
+                  style={{ minHeight: '44px' }}
                 >
                   <i className={`${tab.icon} text-xs`}></i>
-                  <span>{tab.label}</span>
+                  <span className="hidden sm:inline">{tab.label}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Enhanced Mobile Scrollable Content */}
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
             {/* Recent Chats Section */}
             {activeSection === 'chats' && (
               <div>
-                {/* Search Bar */}
-                <div className="mb-4">
+                {/* Enhanced Mobile Search Bar */}
+                <div className="mb-3 sm:mb-4">
                   <div className="relative">
                     <input
                       type="text"
                       placeholder="Search your chats..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 focus:bg-white transition-all"
+                      className="w-full pl-9 sm:pl-10 pr-8 sm:pr-10 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 focus:bg-white transition-all touch-manipulation"
+                      style={{ fontSize: '16px' }} // Prevents zoom on iOS
                     />
                     <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
                     {searchQuery && (
                       <button
                         onClick={clearSearch}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 touch-manipulation"
+                        style={{ minWidth: '24px', minHeight: '24px' }}
                       >
                         <i className="fas fa-times text-sm"></i>
                       </button>
@@ -266,7 +285,7 @@ const Sidebar = ({ isOpen, toggleSidebar, recentChats, startNewChat, loadChatSes
                       <button
                         key={prompt.id}
                         onClick={() => handlePromptClick(prompt.prompt)}
-                        className="group w-full text-left p-4 rounded-2xl bg-gray-50 hover:bg-white hover:shadow-md border border-gray-100 hover:border-gray-200 transition-all duration-300 transform hover:-translate-y-0.5"
+                        className="group w-full text-left p-4 rounded-2xl bg-gray-50/80 hover:bg-white hover:shadow-md border border-gray-100 hover:border-gray-200 transition-all duration-300 transform hover:-translate-y-0.5 active:scale-95 touch-manipulation"
                         style={{ animationDelay: `${index * 0.1}s` }}
                       >
                         <div className="flex items-start space-x-3">
@@ -278,10 +297,10 @@ const Sidebar = ({ isOpen, toggleSidebar, recentChats, startNewChat, loadChatSes
                               {prompt.text}
                             </h4>
                             <p className="text-xs text-gray-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              Click to explore this topic
+                              Tap to explore this topic
                             </p>
                           </div>
-                          <i className="fas fa-arrow-right text-gray-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
+                          <i className="fas fa-arrow-right text-gray-400 text-xs opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-1"></i>
                         </div>
                       </button>
                     ))}
@@ -385,5 +404,56 @@ const Sidebar = ({ isOpen, toggleSidebar, recentChats, startNewChat, loadChatSes
     </>
   );
 };
+
+// Quick Prompts Data
+const quickPrompts = [
+  {
+    id: 1,
+    text: "Five Pillars of Islam",
+    icon: "fas fa-star",
+    prompt: "Tell me about the five pillars of Islam",
+    color: "from-emerald-500 to-teal-600"
+  },
+  {
+    id: 2,
+    text: "Daily Prayers (Salah)",
+    icon: "fas fa-pray",
+    prompt: "How should I perform the daily prayers?",
+    color: "from-blue-500 to-indigo-600"
+  },
+  {
+    id: 3,
+    text: "Quranic Verses",
+    icon: "fas fa-book-quran",
+    prompt: "Share some beautiful verses from the Quran",
+    color: "from-purple-500 to-violet-600"
+  },
+  {
+    id: 4,
+    text: "Prophet's Teachings",
+    icon: "fas fa-heart",
+    prompt: "What are some important teachings of Prophet Muhammad?",
+    color: "from-rose-500 to-pink-600"
+  }
+];
+
+// Topic Tags Data
+const topicTags = [
+  { id: 1, name: "Quran", icon: "fas fa-book-quran", color: "from-emerald-500 to-teal-600" },
+  { id: 2, name: "Hadith", icon: "fas fa-scroll", color: "from-blue-500 to-indigo-600" },
+  { id: 3, name: "Fiqh", icon: "fas fa-balance-scale", color: "from-purple-500 to-violet-600" },
+  { id: 4, name: "Seerah", icon: "fas fa-star", color: "from-amber-500 to-orange-600" },
+  { id: 5, name: "Dua", icon: "fas fa-hands-praying", color: "from-rose-500 to-pink-600" },
+  { id: 6, name: "Aqeedah", icon: "fas fa-heart", color: "from-cyan-500 to-blue-600" }
+];
+
+// Languages Data
+const languages = [
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'ar', name: 'العربية', flag: '🇸🇦' },
+  { code: 'ur', name: 'اردو', flag: '🇵🇰' },
+  { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' },
+  { code: 'hinglish', name: 'Hinglish', flag: '🇮🇳' }
+];
 
 export default Sidebar;
