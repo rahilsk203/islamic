@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import ChatInterface from './components/ChatInterface';
 import Sidebar from './components/Sidebar';
-import { sendMessage } from './utils/api';
+import { sendMessage, sendMessageStreaming } from './utils/api';
 import { useChatMemory, useAutoSave, useSessionManager } from './hooks/useChatMemory';
 
 function App() {
@@ -14,15 +14,16 @@ function App() {
     {
       id: 1,
       sender: 'ai',
-      content: "Assalamu Alaikum! 👋\n\nI'm IslamicAI, your advanced Islamic Scholar AI assistant. I can help you with:\n\n• Qur'an translations and interpretations 📖\n• Authentic Hadith explanations 🕌\n• Fiqh (Islamic jurisprudence) guidance ⚖️\n• Seerah (Prophet's biography) insights 🌟\n• Dua (supplications) and spiritual guidance 🤲\n\nAsk me anything about Islam, and I'll provide scholarly, accurate responses. May Allah guide our conversation! 🤲",
-      timestamp: new Date()
+      content: "Assalamu Alaikum! 👋\n\nI'm IslamicAI, your Islamic Scholar AI assistant. How can I help you today?",
+      timestamp: new Date(),
+      isStreaming: false
     }
   ]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [streamingMessageId, setStreamingMessageId] = useState(null);
 
-  // Remove the isSaving variable since we're not showing save status anymore
-  // const { isSaving } = useAutoSave(currentSessionId, messages, async (sessionId, msgs) => {
+  // Auto-save functionality
   useAutoSave(currentSessionId, messages, async (sessionId, msgs) => {
     // Only save if there's actual conversation (user + AI messages)
     const userMessages = msgs.filter(msg => msg.sender === 'user');
@@ -65,8 +66,9 @@ function App() {
       {
         id: Date.now(),
         sender: 'ai',
-        content: "Assalamu Alaikum! 👋\n\nI'm IslamicAI, your advanced Islamic Scholar AI assistant. How can I help you today?",
-        timestamp: new Date() // Ensure timestamp is always a Date object
+        content: "Assalamu Alaikum! 👋\n\nI'm IslamicAI, your Islamic Scholar AI assistant. How can I help you today?",
+        timestamp: new Date(),
+        isStreaming: false
       }
     ]);
     
@@ -80,13 +82,40 @@ function App() {
     const session = loadChat(chatSessionId);
     if (session) {
       switchToSession(session.id, session.title);
-      setMessages(session.messages);
+      // Ensure all loaded messages have isStreaming: false
+      const updatedMessages = session.messages.map(msg => ({
+        ...msg,
+        isStreaming: false
+      }));
+      setMessages(updatedMessages);
       
       // Close sidebar on mobile after loading chat
       if (window.innerWidth < 768) {
         setIsSidebarOpen(false);
       }
     }
+  };
+
+  const updateStreamingMessage = (messageId, content, isComplete = false) => {
+    setMessages(prev => {
+      // Find and update only the specific message, prevent duplicates
+      const messageExists = prev.find(msg => msg.id === messageId);
+      if (!messageExists) {
+        console.warn('Message not found for update:', messageId);
+        return prev;
+      }
+      
+      return prev.map(msg => {
+        if (msg.id === messageId) {
+          return {
+            ...msg,
+            content: content,
+            isStreaming: !isComplete
+          };
+        }
+        return msg;
+      });
+    });
   };
 
   const addMessage = async (content, sender = 'user') => {
@@ -100,39 +129,86 @@ function App() {
       id: Date.now(),
       sender,
       content: content.trim(),
-      timestamp: new Date() // Ensure timestamp is always a Date object
+      timestamp: new Date(),
+      isStreaming: false
     };
     
     setMessages(prev => [...prev, newMessage]);
     
-    // If it's a user message, get response from backend
+    // If it's a user message, get response from backend with streaming
     if (sender === 'user') {
       setIsLoading(true);
       
+      // Create placeholder AI message for streaming
+      const aiMessageId = Date.now() + 1;
+      const aiMessage = {
+        id: aiMessageId,
+        sender: 'ai',
+        content: '',
+        timestamp: new Date(),
+        isStreaming: true
+      };
+      
+      // Add AI message placeholder - check for duplicates
+      setMessages(prev => {
+        // Prevent duplicate AI messages - check if last message is empty AI message
+        const lastMessage = prev[prev.length - 1];
+        const hasRecentEmptyAiMessage = lastMessage && 
+          lastMessage.sender === 'ai' && 
+          (!lastMessage.content || lastMessage.content === '') &&
+          lastMessage.isStreaming;
+        
+        if (hasRecentEmptyAiMessage) {
+          console.warn('Preventing duplicate AI message, using existing:', lastMessage.id);
+          return prev;
+        }
+        
+        return [...prev, aiMessage];
+      });
+      
+      // Set streaming message ID after state update
+      setTimeout(() => {
+        setMessages(current => {
+          const lastMessage = current[current.length - 1];
+          if (lastMessage && lastMessage.sender === 'ai' && lastMessage.isStreaming) {
+            setStreamingMessageId(lastMessage.id);
+          }
+          return current;
+        });
+      }, 0);
+      
       try {
-        console.log('Sending message to backend:', { sessionId: currentSessionId, content: content.trim() });
-        const response = await sendMessage(currentSessionId, content.trim());
-        console.log('Received response from backend:', response);
+        console.log('Sending message with streaming to backend:', { sessionId: currentSessionId, content: content.trim() });
         
-        const aiMessage = {
-          id: Date.now() + 1,
-          sender: 'ai',
-          content: response.reply || "I'm processing your request...",
-          timestamp: new Date() // Ensure timestamp is always a Date object
-        };
+        const response = await sendMessageStreaming(currentSessionId, content.trim(), {
+          onStreamStart: () => {
+            console.log('🏁 Streaming started');
+          },
+          onStreamChunk: (chunk, fullContent, chunkData) => {
+            // Update the streaming message with new content
+            updateStreamingMessage(aiMessageId, fullContent, false);
+          },
+          onStreamEnd: (fullContent) => {
+            console.log('✅ Streaming completed');
+            updateStreamingMessage(aiMessageId, fullContent, true);
+            setStreamingMessageId(null);
+            setIsLoading(false);
+          },
+          onStreamError: (error) => {
+            console.error('❌ Streaming error:', error);
+            updateStreamingMessage(aiMessageId, `Sorry, I encountered an error during streaming: ${error}`, true);
+            setStreamingMessageId(null);
+            setIsLoading(false);
+          }
+        });
         
-        setMessages(prev => [...prev, aiMessage]);
+        // Don't process the return value since everything is handled via callbacks
+        console.log('Streaming response completed via callbacks');
         
       } catch (error) {
-        console.error('Error sending message:', error);
-        const errorMessage = {
-          id: Date.now() + 1,
-          sender: 'ai',
-          content: "Sorry, I encountered an error connecting to the backend. Please make sure the IslamicAI backend is running and try again.",
-          timestamp: new Date() // Ensure timestamp is always a Date object
-        };
-        setMessages(prev => [...prev, errorMessage]);
-      } finally {
+        console.error('Error with streaming message:', error);
+        updateStreamingMessage(aiMessageId, "Sorry, I encountered an error connecting to the backend. Please make sure the IslamicAI backend is running and try again.", true);
+        setStreamingMessageId(null);
         setIsLoading(false);
       }
     }

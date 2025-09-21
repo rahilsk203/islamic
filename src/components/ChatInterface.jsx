@@ -221,36 +221,12 @@ const ChatInterface = ({ messages, onSendMessage, isLoading }) => {
             <div key={message.id} className="animate-fade-in-up">
               <MessageBubble 
                 message={message} 
-                isStreaming={message.sender === 'ai' && isLoading && messages[messages.length - 1].id === message.id}
+                isStreaming={message.isStreaming || (message.sender === 'ai' && isLoading && messages[messages.length - 1].id === message.id)}
               />
             </div>
           ))}
           
-          {/* Enhanced Loading State */}
-          {isLoading && (
-            <div className="flex justify-start animate-fade-in-up">
-              <div className="max-w-2xl w-full">
-                <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-2xl shadow-lg p-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                      <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <i className="fas fa-mosque text-emerald-500 animate-pulse"></i>
-                      <span className="text-sm font-medium text-gray-600">IslamicAI is researching...</span>
-                      <div className="flex space-x-1">
-                        <i className="fas fa-book-quran text-emerald-400 text-xs animate-pulse"></i>
-                        <i className="fas fa-star text-amber-400 text-xs animate-pulse" style={{animationDelay: '0.3s'}}></i>
-                        <i className="fas fa-hands-praying text-blue-400 text-xs animate-pulse" style={{animationDelay: '0.6s'}}></i>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Loading handled by MessageBubble component when streaming */}
           
           {/* Welcome Actions */}
           {messages.length === 1 && messages[0].sender === 'ai' && (
@@ -289,23 +265,10 @@ const ChatInterface = ({ messages, onSendMessage, isLoading }) => {
       {/* ChatGPT-Style Input Area - Fixed at Bottom */}
       <div className="sticky bottom-0 bg-white border-t border-gray-200 shadow-lg">
         <div className="max-w-3xl mx-auto px-4 py-4">
-          {/* Input Tools - Simplified */}
-          <div className="flex items-center justify-between mb-3 input-tools">
-            <div className="flex items-center space-x-2">
-              {/* Input tools removed - keeping only essential functionality */}
-            </div>
-            
-            <div className="flex items-center space-x-2 text-xs text-gray-500 keyboard-hint">
-              <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 bg-gray-100 rounded-full">
-                <i className="fas fa-keyboard text-gray-400"></i>
-                <span>Press</span>
-                <kbd className="px-2 py-1 bg-white border border-gray-300 rounded font-mono text-xs shadow-sm">Enter</kbd>
-                <span>to send</span>
-              </div>
-              <div className="md:hidden flex items-center space-x-1 px-2 py-1 bg-gray-100 rounded-full">
-                <i className="fas fa-keyboard text-gray-400 text-xs"></i>
-                <kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded font-mono text-xs">Enter</kbd>
-              </div>
+          {/* Simple Input Tools */}
+          <div className="flex items-center justify-end mb-3">
+            <div className="text-xs text-gray-500">
+              Press <kbd className="px-2 py-1 bg-gray-100 border border-gray-300 rounded font-mono text-xs">Enter</kbd> to send
             </div>
           </div>
           
@@ -376,51 +339,30 @@ const ChatInterface = ({ messages, onSendMessage, isLoading }) => {
                 </div>
               </div>
               
-              {/* ChatGPT-Style Send Button */}
+              {/* Simple Send Button */}
               <button
                 onClick={handleSend}
                 disabled={!inputValue?.trim() || isLoading}
-                className={`group relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300 ${
+                className={`flex items-center justify-center w-10 h-10 rounded-xl transition-colors ${
                   inputValue?.trim() && !isLoading
-                    ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md hover:shadow-lg hover:scale-105 active:scale-95'
+                    ? 'bg-blue-500 hover:bg-blue-600 text-white'
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 }`}
                 title={isLoading ? "Sending..." : "Send Message"}
               >
-                <div className="relative z-10">
-                  {isLoading ? (
-                    <div className="flex items-center space-x-1">
-                      <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce"></div>
-                      <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                      <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                    </div>
-                  ) : (
-                    <i className="fas fa-paper-plane text-sm group-hover:scale-110 transition-transform duration-200"></i>
-                  )}
-                </div>
+                {isLoading ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <i className="fas fa-paper-plane text-sm"></i>
+                )}
               </button>
             </div>
           </div>
           
-          {/* ChatGPT-Style Footer */}
+          {/* Simple Footer */}
           <div className="flex items-center justify-center mt-4 pt-3 border-t border-gray-100">
-            <div className="flex items-center space-x-4 text-xs text-gray-500">
-              <span className="flex items-center space-x-1">
-                <i className="fas fa-shield-alt text-emerald-500"></i>
-                <span>Secure</span>
-              </span>
-              <span className="flex items-center space-x-1">
-                <i className="fas fa-brain text-blue-500"></i>
-                <span>AI-Powered</span>
-              </span>
-              <span className="flex items-center space-x-1">
-                <i className="fas fa-book-quran text-purple-500"></i>
-                <span>Islamic Scholar</span>
-              </span>
-              <span className="flex items-center space-x-1">
-                <i className="fas fa-star text-amber-400"></i>
-                <span>v2.0</span>
-              </span>
+            <div className="text-xs text-gray-500">
+              IslamicAI v2.0
             </div>
           </div>
         </div>

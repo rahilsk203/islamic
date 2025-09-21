@@ -1,23 +1,46 @@
 // API utility functions for connecting to the IslamicAI backend
 
- const API_BASE_URL = 'https://islamicai.sohal70760.workers.dev'; // Default local development URL
-// const API_BASE_URL = 'http://127.0.0.1:8787'; // Default local development URL
+// const API_BASE_URL = 'https://islamicai.sohal70760.workers.dev'; // Production URL
+const API_BASE_URL = 'http://127.0.0.1:8787'; // Local development URL
+
 /**
- * Send a message to the IslamicAI backend (backend handles language detection)
+ * Send a message to the IslamicAI backend with streaming support
  * @param {string} sessionId - The session ID for this conversation
  * @param {string} message - The user's message
- * @returns {Promise<Object>} The response from the backend
+ * @param {Object} options - Additional options for the request
+ * @returns {Promise<Object>} The response from the backend (either direct or streaming)
  */
-export const sendMessage = async (sessionId, message) => {
+export const sendMessage = async (sessionId, message, options = {}) => {
   try {
-    // Backend handles all language detection now
+    const {
+      enableStreaming = true, // Enable streaming by default
+      onStreamChunk = null,   // Callback for streaming chunks
+      onStreamStart = null,   // Callback when streaming starts
+      onStreamEnd = null,     // Callback when streaming ends
+      onStreamError = null,   // Callback for streaming errors
+      languageInfo = null     // Optional language information
+    } = options;
+    
+    // Prepare request body with all required parameters
     const requestBody = {
-      message: message
+      message: message,
+      session_id: sessionId,
+      language_info: languageInfo || {
+        detected_language: 'english',
+        confidence: 0.9,
+        should_respond_in_language: true
+      },
+      streaming_options: {
+        enableStreaming: enableStreaming,
+        chunkSize: 30,
+        delay: 50,
+        includeMetadata: true
+      }
     };
     
-    console.log('Sending message to backend:', { sessionId, message });
+    console.log('Sending message to backend:', { sessionId, message, enableStreaming });
     
-    const response = await fetch(`${API_BASE_URL}?session_id=${sessionId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -33,13 +56,142 @@ export const sendMessage = async (sessionId, message) => {
       throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
     }
 
-    const data = await response.json();
-    console.log('Backend response data:', data);
-    return data;
+    // Check if response is streaming or direct
+    const contentType = response.headers.get('content-type');
+    
+    if (contentType && contentType.includes('text/event-stream') && enableStreaming) {
+      console.log('✅ Streaming response detected');
+      
+      if (onStreamStart) {
+        onStreamStart();
+      }
+      
+      // Handle streaming response
+      return await handleStreamingResponse(response, {
+        onStreamChunk,
+        onStreamEnd,
+        onStreamError
+      });
+    } else {
+      console.log('📄 Direct response detected');
+      
+      // Handle direct JSON response
+      const data = await response.json();
+      console.log('Backend response data:', data);
+      return {
+        type: 'direct',
+        reply: data.reply,
+        session_id: data.session_id,
+        streaming: false,
+        ...data
+      };
+    }
   } catch (error) {
     console.error('Error sending message to backend:', error);
     throw error;
   }
+};
+
+/**
+ * Handle streaming response from backend
+ * @param {Response} response - The fetch response object
+ * @param {Object} callbacks - Streaming callbacks
+ * @returns {Promise<Object>} Complete response data
+ */
+const handleStreamingResponse = async (response, callbacks = {}) => {
+  const { onStreamChunk, onStreamEnd, onStreamError } = callbacks;
+  
+  try {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullResponse = '';
+    let chunkCount = 0;
+    
+    while (true) {
+      const { done, value } = await reader.read();
+      
+      if (done) {
+        console.log('✅ Streaming completed');
+        if (onStreamEnd) {
+          onStreamEnd(fullResponse);
+        }
+        break;
+      }
+      
+      const chunk = decoder.decode(value);
+      chunkCount++;
+      
+      // Parse Server-Sent Events format
+      const lines = chunk.split('\n');
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          try {
+            const chunkData = JSON.parse(line.substring(6));
+            
+            if (chunkData.type === 'content' && chunkData.content) {
+              fullResponse += chunkData.content;
+              
+              if (onStreamChunk) {
+                onStreamChunk(chunkData.content, fullResponse, chunkData);
+              }
+            } else if (chunkData.type === 'error') {
+              console.error('Stream error:', chunkData.content);
+              if (onStreamError) {
+                onStreamError(chunkData.content);
+              }
+            } else if (chunkData.type === 'start') {
+              console.log('📡 Stream started:', chunkData.metadata);
+            } else if (chunkData.type === 'end') {
+              console.log('🏁 Stream ended:', chunkData.metadata);
+            }
+          } catch (parseError) {
+            console.warn('Failed to parse chunk:', line);
+          }
+        }
+      }
+    }
+    
+    return {
+      type: 'streaming',
+      reply: fullResponse,
+      streaming: true,
+      chunkCount: chunkCount,
+      success: true
+    };
+    
+  } catch (error) {
+    console.error('Streaming error:', error);
+    if (onStreamError) {
+      onStreamError(error.message);
+    }
+    throw error;
+  }
+};
+
+/**
+ * Send a message with direct response (no streaming)
+ * @param {string} sessionId - The session ID
+ * @param {string} message - The user's message
+ * @returns {Promise<Object>} Direct response from backend
+ */
+export const sendMessageDirect = async (sessionId, message) => {
+  return await sendMessage(sessionId, message, {
+    enableStreaming: false
+  });
+};
+
+/**
+ * Send a message with streaming enabled
+ * @param {string} sessionId - The session ID
+ * @param {string} message - The user's message
+ * @param {Object} streamingCallbacks - Streaming event callbacks
+ * @returns {Promise<Object>} Streaming response from backend
+ */
+export const sendMessageStreaming = async (sessionId, message, streamingCallbacks = {}) => {
+  return await sendMessage(sessionId, message, {
+    enableStreaming: true,
+    ...streamingCallbacks
+  });
 };
 
 /**
