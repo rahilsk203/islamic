@@ -182,28 +182,41 @@ function App() {
         
         const response = await sendMessageStreaming(currentSessionId, content.trim(), {
           onStreamStart: () => {
-            console.log('🏁 Streaming started');
+            console.log('🏁 Enhanced streaming started with ultra-advanced features');
           },
           onStreamChunk: (chunk, fullContent, chunkData) => {
             // Update the streaming message with new content
             updateStreamingMessage(aiMessageId, fullContent, false);
           },
-          onStreamEnd: (fullContent) => {
-            console.log('✅ Streaming completed');
+          onStreamEnd: (fullContent, enhancedData) => {
+            console.log('✅ Enhanced streaming completed');
             updateStreamingMessage(aiMessageId, fullContent, true);
             setStreamingMessageId(null);
             setIsLoading(false);
+            
+            // 🧠 Process enhanced analytics data from ultra-advanced backend
+            if (enhancedData) {
+              if (enhancedData.analytics) {
+                console.log('📊 Received session analytics:', enhancedData.analytics);
+              }
+              if (enhancedData.learning) {
+                console.log('🧠 Received learning insights:', enhancedData.learning);
+              }
+              if (enhancedData.newsIntegration) {
+                console.log('📰 Received news integration data:', enhancedData.newsIntegration);
+              }
+            }
           },
           onStreamError: (error) => {
-            console.error('❌ Streaming error:', error);
+            console.error('❌ Enhanced streaming error:', error);
             updateStreamingMessage(aiMessageId, `Sorry, I encountered an error during streaming: ${error}`, true);
             setStreamingMessageId(null);
             setIsLoading(false);
           }
         });
         
-        // Don't process the return value since everything is handled via callbacks
-        console.log('Streaming response completed via callbacks');
+        // Don't process the return value since everything is handled via enhanced callbacks
+        console.log('Enhanced streaming response completed via ultra-advanced callbacks');
         
       } catch (error) {
         console.error('Error with streaming message:', error);
@@ -275,6 +288,7 @@ function App() {
           messages={messages} 
           onSendMessage={addMessage}
           isLoading={isLoading}
+          currentSessionId={currentSessionId}
         />
       </main>
     </div>

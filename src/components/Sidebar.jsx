@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { deleteChatSession, searchChatHistory, getChatStatistics } from '../utils/api';
+import { deleteChatSession, searchChatHistory, getChatStatistics, getSessionAnalytics, getLearningInsights } from '../utils/api';
 import { getRelativeTime } from '../utils/timestamp';
 
 const Sidebar = ({ isOpen, toggleSidebar, recentChats, startNewChat, loadChatSession, currentSessionId }) => {
@@ -9,12 +9,19 @@ const Sidebar = ({ isOpen, toggleSidebar, recentChats, startNewChat, loadChatSes
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [chatStats, setChatStats] = useState(null);
+  const [sessionAnalytics, setSessionAnalytics] = useState(null);
+  const [learningInsights, setLearningInsights] = useState(null);
 
-  // Load chat statistics when sidebar opens
+  // Load chat statistics and analytics when sidebar opens
   useEffect(() => {
     if (isOpen) {
       const stats = getChatStatistics();
+      const analytics = getSessionAnalytics();
+      const insights = getLearningInsights();
+      
       setChatStats(stats);
+      setSessionAnalytics(analytics.analytics);
+      setLearningInsights(insights);
     }
   }, [isOpen, recentChats]);
 
@@ -157,18 +164,106 @@ const Sidebar = ({ isOpen, toggleSidebar, recentChats, startNewChat, loadChatSes
                   </div>
                 </div>
 
+                {/* 🧠 Ultra-Advanced Learning Analytics Dashboard */}
+                {learningInsights && (learningInsights.intelligenceGain > 0 || learningInsights.patternRecognitionAccuracy > 0) && (
+                  <div className="mb-4 p-3 bg-gradient-to-br from-emerald-50 via-blue-50 to-indigo-50 rounded-xl border border-emerald-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-1">
+                        <div className="w-4 h-4 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-full flex items-center justify-center">
+                          <i className="fas fa-brain text-white text-xs"></i>
+                        </div>
+                        <h4 className="text-xs font-semibold text-gray-700">Ultra-Learning Progress</h4>
+                      </div>
+                      <div className="text-xs text-emerald-600 font-bold">
+                        Level {Math.floor((learningInsights.intelligenceGain || 0) * 20) + 1}
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="bg-white/80 rounded-lg p-2 border border-emerald-100">
+                        <div className="text-emerald-600 font-medium">Intelligence</div>
+                        <div className="text-sm font-bold text-emerald-700">
+                          +{((learningInsights.intelligenceGain || 0) * 100).toFixed(1)}%
+                        </div>
+                      </div>
+                      <div className="bg-white/80 rounded-lg p-2 border border-blue-100">
+                        <div className="text-blue-600 font-medium">Recognition</div>
+                        <div className="text-sm font-bold text-blue-700">
+                          {((learningInsights.patternRecognitionAccuracy || 0) * 100).toFixed(0)}%
+                        </div>
+                      </div>
+                      <div className="bg-white/80 rounded-lg p-2 border border-purple-100">
+                        <div className="text-purple-600 font-medium">Adaptive</div>
+                        <div className="text-sm font-bold text-purple-700">
+                          {((learningInsights.adaptiveResponseScore || 0) * 100).toFixed(0)}/100
+                        </div>
+                      </div>
+                      <div className="bg-white/80 rounded-lg p-2 border border-amber-100">
+                        <div className="text-amber-600 font-medium">Satisfaction</div>
+                        <div className="text-sm font-bold text-amber-700">
+                          {((learningInsights.userSatisfactionIndex || 0) * 100).toFixed(0)}%
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Real-time Learning Indicator */}
+                    <div className="mt-2 pt-2 border-t border-emerald-200/50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <div className="flex space-x-1">
+                            <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse"></div>
+                            <div className="w-1 h-1 bg-blue-500 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                            <div className="w-1 h-1 bg-purple-500 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                          </div>
+                          <span className="text-xs text-emerald-600 font-medium">Self-Learning Active</span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          ⚡ Ultra-Mode
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
                 {/* Chat Statistics */}
                 {chatStats && !searchQuery && (
                   <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-xs font-semibold text-gray-700 flex items-center space-x-1">
+                        <i className="fas fa-chart-bar text-blue-500 text-xs"></i>
+                        <span>Session Stats</span>
+                      </h4>
+                      {learningInsights && learningInsights.intelligenceGain > 0 && (
+                        <div className="flex items-center space-x-1 text-xs text-emerald-600">
+                          <i className="fas fa-brain text-xs"></i>
+                          <span className="font-bold">Learning</span>
+                        </div>
+                      )}
+                    </div>
+                    
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="text-center">
+                      <div className="text-center bg-white/80 rounded-lg p-2">
                         <div className="font-semibold text-blue-700">{chatStats.totalSessions}</div>
                         <div className="text-blue-600">Total Chats</div>
                       </div>
-                      <div className="text-center">
+                      <div className="text-center bg-white/80 rounded-lg p-2">
                         <div className="font-semibold text-blue-700">{chatStats.totalMessages}</div>
                         <div className="text-blue-600">Messages</div>
                       </div>
+                      {chatStats.averageMessagesPerSession > 0 && (
+                        <>
+                          <div className="text-center bg-white/80 rounded-lg p-2">
+                            <div className="font-semibold text-indigo-700">{chatStats.averageMessagesPerSession}</div>
+                            <div className="text-indigo-600">Avg/Chat</div>
+                          </div>
+                          <div className="text-center bg-white/80 rounded-lg p-2">
+                            <div className="font-semibold text-purple-700">
+                              {learningInsights ? Math.floor((learningInsights.intelligenceGain || 0) * 20) + 1 : 1}
+                            </div>
+                            <div className="text-purple-600">AI Level</div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}
