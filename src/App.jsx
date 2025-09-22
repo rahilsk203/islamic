@@ -21,14 +21,12 @@ function App() {
   ]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [streamingMessageId, setStreamingMessageId] = useState(null);
   const [isNewsSearching, setIsNewsSearching] = useState(false);
   const [newsSearchProgress, setNewsSearchProgress] = useState(0);
-  const [newsSearchType, setNewsSearchType] = useState('news'); // 'news' or 'internet'
+  const [newsSearchType, setNewsSearchType] = useState('news');
 
   // Auto-save functionality
   useAutoSave(currentSessionId, messages, async (sessionId, msgs) => {
-    // Only save if there's actual conversation (user + AI messages)
     const userMessages = msgs.filter(msg => msg.sender === 'user');
     const aiMessages = msgs.filter(msg => msg.sender === 'ai');
     
@@ -40,26 +38,8 @@ function App() {
     }
   });
 
-  // Debug sidebar state
-  useEffect(() => {
-    console.log('Sidebar state changed:', isSidebarOpen);
-  }, [isSidebarOpen]);
-
-  // Make messages available globally for language detection
-  useEffect(() => {
-    window.recentMessages = messages;
-  }, [messages]);
-
   const toggleSidebar = () => {
-    console.log('Toggle sidebar clicked, current state:', isSidebarOpen);
-    const newState = !isSidebarOpen;
-    console.log('Setting sidebar to:', newState);
-    setIsSidebarOpen(newState);
-    
-    // Force a re-render to ensure state updates
-    setTimeout(() => {
-      console.log('Sidebar state after update:', isSidebarOpen);
-    }, 100);
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
   const startNewChat = () => {
@@ -75,7 +55,6 @@ function App() {
       }
     ]);
     
-    // Close sidebar on mobile after starting new chat
     if (window.innerWidth < 768) {
       setIsSidebarOpen(false);
     }
@@ -85,14 +64,12 @@ function App() {
     const session = loadChat(chatSessionId);
     if (session) {
       switchToSession(session.id, session.title);
-      // Ensure all loaded messages have isStreaming: false
       const updatedMessages = session.messages.map(msg => ({
         ...msg,
         isStreaming: false
       }));
       setMessages(updatedMessages);
       
-      // Close sidebar on mobile after loading chat
       if (window.innerWidth < 768) {
         setIsSidebarOpen(false);
       }
@@ -101,13 +78,6 @@ function App() {
 
   const updateStreamingMessage = (messageId, content, isComplete = false) => {
     setMessages(prev => {
-      // Find and update only the specific message, prevent duplicates
-      const messageExists = prev.find(msg => msg.id === messageId);
-      if (!messageExists) {
-        console.warn('Message not found for update:', messageId);
-        return prev;
-      }
-      
       return prev.map(msg => {
         if (msg.id === messageId) {
           return {
@@ -124,7 +94,6 @@ function App() {
   const addMessage = async (content, sender = 'user') => {
     // Validate input
     if (!content || typeof content !== 'string') {
-      console.error('Invalid message content:', content);
       return;
     }
 
@@ -152,119 +121,60 @@ function App() {
         isStreaming: true
       };
       
-      // Add AI message placeholder - check for duplicates
-      setMessages(prev => {
-        // Prevent duplicate AI messages - check if last message is empty AI message
-        const lastMessage = prev[prev.length - 1];
-        const hasRecentEmptyAiMessage = lastMessage && 
-          lastMessage.sender === 'ai' && 
-          (!lastMessage.content || lastMessage.content === '') &&
-          lastMessage.isStreaming;
-        
-        if (hasRecentEmptyAiMessage) {
-          console.warn('Preventing duplicate AI message, using existing:', lastMessage.id);
-          return prev;
-        }
-        
-        return [...prev, aiMessage];
-      });
-      
-      // Set streaming message ID after state update
-      setTimeout(() => {
-        setMessages(current => {
-          const lastMessage = current[current.length - 1];
-          if (lastMessage && lastMessage.sender === 'ai' && lastMessage.isStreaming) {
-            setStreamingMessageId(lastMessage.id);
-          }
-          return current;
-        });
-      }, 0);
+      setMessages(prev => [...prev, aiMessage]);
       
       try {
-        console.log('Sending message with streaming to backend:', { sessionId: currentSessionId, content: content.trim() });
-        
         const response = await sendMessageStreaming(currentSessionId, content.trim(), {
-          onStreamStart: () => {
-            console.log('🏁 Enhanced streaming started with ultra-advanced features');
-          },
+          onStreamStart: () => {},
           onStreamChunk: (chunk, fullContent, chunkData) => {
-            // Update the streaming message with new content
             updateStreamingMessage(aiMessageId, fullContent, false);
           },
-          // 🔍 Backend News Search Event Handlers
           onNewsSearchStart: (searchData) => {
-            console.log('🔍 Backend news/internet search started:', searchData);
             setIsNewsSearching(true);
             setNewsSearchProgress(0);
             setNewsSearchType(searchData?.searchType || 'news');
           },
           onNewsSearchProgress: (progressData) => {
-            console.log('📈 Backend search progress:', progressData);
             if (progressData?.progress !== undefined) {
               setNewsSearchProgress(progressData.progress);
             }
           },
           onNewsSearchEnd: (searchResult) => {
-            console.log('✅ Backend search completed:', searchResult);
             setIsNewsSearching(false);
             setNewsSearchProgress(100);
-            // Keep progress visible for a moment then reset
             setTimeout(() => {
               setNewsSearchProgress(0);
             }, 1500);
           },
           onStreamEnd: (fullContent, enhancedData) => {
-            console.log('✅ Enhanced streaming completed');
             updateStreamingMessage(aiMessageId, fullContent, true);
-            setStreamingMessageId(null);
             setIsLoading(false);
             
-            // Ensure news search is stopped if not already
             if (isNewsSearching) {
               setIsNewsSearching(false);
               setNewsSearchProgress(0);
             }
-            
-            // 🧠 Process enhanced analytics data from ultra-advanced backend
-            if (enhancedData) {
-              if (enhancedData.analytics) {
-                console.log('📊 Received session analytics:', enhancedData.analytics);
-              }
-              if (enhancedData.learning) {
-                console.log('🧠 Received learning insights:', enhancedData.learning);
-              }
-              if (enhancedData.newsIntegration) {
-                console.log('📰 Received news integration data:', enhancedData.newsIntegration);
-              }
-            }
           },
           onStreamError: (error) => {
-            console.error('❌ Enhanced streaming error:', error);
-            updateStreamingMessage(aiMessageId, `Sorry, I encountered an error during streaming: ${error}`, true);
-            setStreamingMessageId(null);
+            updateStreamingMessage(aiMessageId, `Sorry, I encountered an error: ${error}`, true);
             setIsLoading(false);
-            setIsNewsSearching(false); // Stop news search indicator
+            setIsNewsSearching(false);
             setNewsSearchProgress(0);
           }
         });
         
-        // Don't process the return value since everything is handled via enhanced callbacks
-        console.log('Enhanced streaming response completed via ultra-advanced callbacks');
-        
       } catch (error) {
-        console.error('Error with streaming message:', error);
-        updateStreamingMessage(aiMessageId, "Sorry, I encountered an error connecting to the backend. Please make sure the IslamicAI backend is running and try again.", true);
-        setStreamingMessageId(null);
+        updateStreamingMessage(aiMessageId, "Sorry, I encountered an error connecting to the backend.", true);
         setIsLoading(false);
-        setIsNewsSearching(false); // Stop news search indicator
+        setIsNewsSearching(false);
         setNewsSearchProgress(0);
       }
     }
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 overflow-hidden">
-      {/* Enhanced Sidebar */}
+    <div className="flex h-screen bg-white overflow-hidden">
+      {/* Sidebar */}
       <Sidebar 
         isOpen={isSidebarOpen} 
         toggleSidebar={toggleSidebar}
@@ -274,51 +184,46 @@ function App() {
         currentSessionId={currentSessionId}
       />
 
-      {/* Main Chat Area with Enhanced Responsive Design */}
+      {/* Main Chat Area */}
       <main className="flex-1 flex flex-col overflow-hidden relative">
-        {/* Mobile Header - Enhanced for Better UX */}
-        <div className="md:hidden bg-white/95 backdrop-blur-md border-b border-gray-200 px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between relative z-50 sticky top-0 mobile-header-sticky shadow-sm">
-          <div className="flex items-center space-x-2 sm:space-x-3">
+        {/* Mobile Header */}
+        <div className="md:hidden bg-white border-b border-gray-200 px-3 py-2.5 flex items-center justify-between sticky top-0 z-50">
+          <div className="flex items-center">
             <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleSidebar();
-              }}
-              className="p-2.5 sm:p-3 text-gray-600 hover:text-gray-800 hover:bg-gray-100/80 rounded-xl transition-all touch-button bg-blue-50/80 border border-blue-200/50 backdrop-blur-sm active:scale-95"
-              style={{ minWidth: '44px', minHeight: '44px' }}
+              onClick={toggleSidebar}
+              className="p-1.5 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded mr-1"
               aria-label="Toggle sidebar"
               type="button"
             >
-              <i className="fas fa-bars text-base sm:text-lg"></i>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M3 6H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M3 18H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
             </button>
-            <div className="flex items-center space-x-2">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-md">
-                <i className="fas fa-mosque text-white text-xs sm:text-sm"></i>
+            <div className="flex items-center">
+              <div className="w-7 h-7 rounded-sm bg-green-500 flex items-center justify-center mr-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="white" strokeWidth="2"/>
+                  <path d="M12 16V12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                  <circle cx="12" cy="8" r="1" fill="white"/>
+                </svg>
               </div>
-              <div>
-                <h1 className="text-base sm:text-lg font-bold text-gray-800 leading-tight">IslamicAI</h1>
-                <p className="text-xs text-gray-500 hidden sm:block leading-tight">Scholar Assistant</p>
-              </div>
+              <h1 className="text-base font-semibold text-gray-900">IslamicAI</h1>
             </div>
           </div>
-          <div className="flex items-center space-x-1 sm:space-x-2">
-            <button
-              onClick={startNewChat}
-              className="p-2 sm:p-2.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50/80 rounded-xl transition-all touch-button active:scale-95"
-              style={{ minWidth: '44px', minHeight: '44px' }}
-              title="New Chat"
-            >
-              <i className="fas fa-plus text-base sm:text-lg"></i>
-            </button>
-          </div>
+          <button
+            onClick={startNewChat}
+            className="p-1.5 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded"
+            title="New Chat"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 5V19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </button>
         </div>
 
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5 pointer-events-none">
-          <div className="w-full h-full bg-gradient-to-br from-blue-50/30 to-indigo-50/30"></div>
-        </div>
-        
         <ChatInterface 
           messages={messages} 
           onSendMessage={addMessage}
