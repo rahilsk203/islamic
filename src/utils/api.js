@@ -1,7 +1,7 @@
 // API utility functions for connecting to the IslamicAI backend
 // Enhanced with ultra-advanced session memory and self-learning integration
 
-const API_BASE_URL = 'http://127.0.0.1:8787'; // Local development URL
+const API_BASE_URL = 'https://islamicai.sohal70760.workers.dev'; // Local development URL
 // const API_BASE_URL = 'https://islamicai.sohal70760.workers.dev'; // Production URL
 
 // 🧠 Advanced frontend session management
