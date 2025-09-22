@@ -1,7 +1,7 @@
 // API utility functions for connecting to the IslamicAI backend
 // Enhanced with ultra-advanced session memory and self-learning integration
 
-const API_BASE_URL = 'http://127.0.0.1:8787'; // Local development URL
+const API_BASE_URL = 'https://islamicai.sohal70760.workers.dev'; // Local development URL
 // const API_BASE_URL = 'https://islamicai.sohal70760.workers.dev'; // Production URL
 
 // 🧠 Advanced frontend session management
@@ -132,7 +132,7 @@ export const sendMessage = async (sessionId, message, options = {}) => {
  * @returns {Promise<Object>} Complete response data with analytics
  */
 const handleEnhancedStreamingResponse = async (response, callbacks = {}) => {
-  const { onStreamChunk, onStreamEnd, onStreamError, sessionId } = callbacks;
+  const { onStreamChunk, onStreamEnd, onStreamError, sessionId, onNewsSearchStart, onNewsSearchProgress, onNewsSearchEnd } = callbacks;
   
   try {
     const reader = response.body.getReader();
@@ -187,6 +187,42 @@ const handleEnhancedStreamingResponse = async (response, callbacks = {}) => {
               // 📰 Store news integration data
               newsIntegrationData = chunkData.data;
               console.log('📰 Received news integration data:', newsIntegrationData);
+            } else if (chunkData.type === 'news_search_start') {
+              // 🔍 Backend started news search
+              console.log('🔍 Backend news search started');
+              if (onNewsSearchStart) {
+                onNewsSearchStart(chunkData.data);
+              }
+            } else if (chunkData.type === 'news_search_progress') {
+              // 📈 Backend news search progress update
+              console.log('📈 Backend news search progress:', chunkData.data);
+              if (onNewsSearchProgress) {
+                onNewsSearchProgress(chunkData.data);
+              }
+            } else if (chunkData.type === 'news_search_end') {
+              // ✅ Backend news search completed
+              console.log('✅ Backend news search completed');
+              if (onNewsSearchEnd) {
+                onNewsSearchEnd(chunkData.data);
+              }
+            } else if (chunkData.type === 'internet_search_start') {
+              // 🌐 Backend started internet search
+              console.log('🌐 Backend internet search started');
+              if (onNewsSearchStart) {
+                onNewsSearchStart({ ...chunkData.data, searchType: 'internet' });
+              }
+            } else if (chunkData.type === 'internet_search_progress') {
+              // 📉 Backend internet search progress
+              console.log('📉 Backend internet search progress:', chunkData.data);
+              if (onNewsSearchProgress) {
+                onNewsSearchProgress({ ...chunkData.data, searchType: 'internet' });
+              }
+            } else if (chunkData.type === 'internet_search_end') {
+              // ✅ Backend internet search completed
+              console.log('✅ Backend internet search completed');
+              if (onNewsSearchEnd) {
+                onNewsSearchEnd({ ...chunkData.data, searchType: 'internet' });
+              }
             } else if (chunkData.type === 'error') {
               console.error('Stream error:', chunkData.content);
               if (onStreamError) {

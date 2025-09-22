@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import MessageBubble from './MessageBubble';
 import { getLanguageUIText, getSessionAnalytics, getLearningInsights, getSessionMemoryStats } from '../utils/api.js';
 
-const ChatInterface = ({ messages, onSendMessage, isLoading, currentSessionId }) => {
+const ChatInterface = ({ messages, onSendMessage, isLoading, currentSessionId, isNewsSearching: propsNewsSearching, newsSearchProgress: propsSearchProgress, newsSearchType: propsSearchType }) => {
   const [inputValue, setInputValue] = useState('');
   const [currentLanguage, setCurrentLanguage] = useState('english');
   const [uiText, setUiText] = useState(getLanguageUIText('english'));
@@ -10,6 +10,9 @@ const ChatInterface = ({ messages, onSendMessage, isLoading, currentSessionId })
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [sessionAnalytics, setSessionAnalytics] = useState(null);
   const [learningInsights, setLearningInsights] = useState(null);
+  const [isNewsSearching, setIsNewsSearching] = useState(false);
+  const [newsSearchProgress, setNewsSearchProgress] = useState(0);
+  const [newsSearchType, setNewsSearchType] = useState('news');
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
@@ -103,6 +106,69 @@ const ChatInterface = ({ messages, onSendMessage, isLoading, currentSessionId })
       }
     }
   }, [messages, currentLanguage]);
+  
+  // 🔍 News search detection and simulation
+  useEffect(() => {
+    // Check if user's message contains news-related keywords
+    if (messages.length > 0) {
+      const lastUserMessage = messages.filter(msg => msg.sender === 'user').pop();
+      if (lastUserMessage && isLoading) {
+        const messageContent = (lastUserMessage.content || '').toLowerCase();
+        
+        // Keywords that trigger news search
+        const newsKeywords = [
+          'news', 'khabar', 'akhbaar', 'samachar', 'خبر', 'اخبار', 'أخبار',
+          'gaza', 'palestine', 'israel', 'muslim', 'islamic', 'syria', 'lebanon',
+          'latest', 'current', 'today', 'aaj', 'current events', 'what happened',
+          'kya hua', 'kya ho raha', 'update', 'breaking', 'al jazeera'
+        ];
+        
+        const isNewsQuery = newsKeywords.some(keyword => 
+          messageContent.includes(keyword)
+        );
+        
+        if (isNewsQuery && !isNewsSearching) {
+          setIsNewsSearching(true);
+          setNewsSearchProgress(0);
+          
+          // Simulate news search progress
+          const progressInterval = setInterval(() => {
+            setNewsSearchProgress(prev => {
+              if (prev >= 100) {
+                clearInterval(progressInterval);
+                return 100;
+              }
+              return prev + Math.random() * 15;
+            });
+          }, 200);
+          
+          // Stop news search when loading ends
+          const stopSearchTimeout = setTimeout(() => {
+            setIsNewsSearching(false);
+            setNewsSearchProgress(0);
+            clearInterval(progressInterval);
+          }, 8000); // 8 seconds max
+          
+          return () => {
+            clearInterval(progressInterval);
+            clearTimeout(stopSearchTimeout);
+          };
+        }
+      }
+    }
+  }, [messages, isLoading, isNewsSearching]);
+  
+  // Stop news search when loading stops
+  useEffect(() => {
+    if (!isLoading && isNewsSearching) {
+      const timeout = setTimeout(() => {
+        setIsNewsSearching(false);
+        setNewsSearchProgress(0);
+      }, 1000);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [isLoading, isNewsSearching]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -241,6 +307,84 @@ const ChatInterface = ({ messages, onSendMessage, isLoading, currentSessionId })
 
   return (
     <div className="flex flex-col h-full bg-white relative">
+      {/* 📰 News Search Indicator - Ultra-Advanced Visual Display */}
+      {isNewsSearching && (
+        <div className="bg-gradient-to-r from-red-50 via-orange-50 to-amber-50 border-b-2 border-red-200 p-3 sm:p-4 animate-pulse">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-orange-600 rounded-full flex items-center justify-center animate-spin">
+                  <i className="fas fa-newspaper text-white text-sm"></i>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2">
+                    <span>🔍 AI News Search Active</span>
+                    <span className="text-red-600">LIVE</span>
+                  </h3>
+                  <p className="text-sm text-gray-700">
+                    {newsSearchType === 'internet' 
+                      ? (currentLanguage === 'hinglish' || currentLanguage === 'hindi' 
+                          ? 'Internet search kar raha hai latest information ke liye...'
+                          : currentLanguage === 'urdu'
+                          ? 'انٹرنیٹ سرچ کر رہا ہے تازہ معلومات کے لیے...'
+                          : 'Searching internet for latest information...')
+                      : (currentLanguage === 'hinglish' || currentLanguage === 'hindi' 
+                          ? 'Latest Islamic news search kar raha hai Al Jazeera se...'
+                          : currentLanguage === 'urdu'
+                          ? 'تازہ اسلامی خبریں تلاش کر رہا ہے الجزیرہ سے...'
+                          : 'Searching latest Islamic news from Al Jazeera...')
+                    }
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2 bg-white/80 px-3 py-2 rounded-full border border-red-200">
+                <i className="fas fa-globe text-red-600 animate-pulse"></i>
+                <span className="text-sm font-bold text-red-700">
+                  {Math.floor(newsSearchProgress)}%
+                </span>
+              </div>
+            </div>
+            
+            {/* Enhanced Progress Bar */}
+            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden border border-gray-300">
+              <div 
+                className="h-full bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 rounded-full transition-all duration-300 relative overflow-hidden"
+                style={{ width: `${newsSearchProgress}%` }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
+              </div>
+            </div>
+            
+            {/* Search Status Messages */}
+            <div className="mt-3 flex items-center justify-between text-xs">
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-1 text-red-600">
+                  <i className="fas fa-search animate-bounce"></i>
+                  <span className="font-medium">
+                    {newsSearchType === 'internet' ? 'Scanning Internet' : 'Scanning Al Jazeera'}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1 text-orange-600">
+                  <i className="fas fa-filter animate-pulse"></i>
+                  <span className="font-medium">
+                    {newsSearchType === 'internet' ? 'Filtering Content' : 'Filtering Islamic Content'}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1 text-amber-600">
+                  <i className="fas fa-language animate-pulse"></i>
+                  <span className="font-medium">Multi-language Processing</span>
+                </div>
+              </div>
+              
+              <div className="text-gray-600 font-medium">
+                ⚡ Ultra-Fast Search
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* 🧠 Enhanced Analytics Panel - Ultra-Advanced Session Memory */}
       {showAnalytics && (sessionAnalytics || learningInsights) && (
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200 p-3 sm:p-4">
@@ -321,6 +465,7 @@ const ChatInterface = ({ messages, onSendMessage, isLoading, currentSessionId })
               <MessageBubble 
                 message={message} 
                 isStreaming={message.isStreaming || (message.sender === 'ai' && isLoading && messages[messages.length - 1].id === message.id)}
+                isNewsSearching={propsNewsSearching}
               />
             </div>
           ))}
@@ -435,8 +580,21 @@ const ChatInterface = ({ messages, onSendMessage, isLoading, currentSessionId })
                   <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce shadow-sm" style={{animationDelay: '0.2s'}}></div>
                 </div>
                 <span className="text-emerald-700 font-medium bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                  🤖 AI jawab de raha hai...
+                  {isNewsSearching 
+                    ? (newsSearchType === 'internet' 
+                        ? '🌐 Internet search + AI response...'
+                        : '📰 News search + AI response...')
+                    : '🤖 AI jawab de raha hai...'
+                  }
                 </span>
+                
+                {/* Backend Search Mini Indicator */}
+                {isNewsSearching && (
+                  <div className="flex items-center space-x-1 bg-red-50 px-2 py-1 rounded-full border border-red-200">
+                    <i className={`fas ${newsSearchType === 'internet' ? 'fa-globe' : 'fa-newspaper'} text-red-600 text-xs animate-pulse`}></i>
+                    <span className="text-xs font-bold text-red-700">{Math.floor(newsSearchProgress)}%</span>
+                  </div>
+                )}
               </div>
             )}
           </div>

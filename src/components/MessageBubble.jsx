@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { formatTimestamp } from '../utils/timestamp';
 
-const MessageBubble = ({ message, isStreaming = false }) => {
+const MessageBubble = ({ message, isStreaming = false, isNewsSearching = false }) => {
   const [displayedContent, setDisplayedContent] = useState('');
   const [showCursor, setShowCursor] = useState(false);
   const contentRef = useRef(null);
@@ -196,7 +196,9 @@ const MessageBubble = ({ message, isStreaming = false }) => {
                       <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce shadow-md" style={{animationDelay: '0.2s'}}></div>
                       <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce shadow-md" style={{animationDelay: '0.4s'}}></div>
                     </div>
-                    <span className="text-base font-medium text-gray-700 bg-gray-100 px-3 py-1 rounded-full">🤔 AI soch raha hai...</span>
+                    <span className="text-base font-medium text-gray-700 bg-gray-100 px-3 py-1 rounded-full">
+                      {isNewsSearching ? '📰 News search kar raha hai...' : '🤔 AI soch raha hai...'}
+                    </span>
                   </div>
                 ) : (
                   <>

@@ -22,6 +22,9 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [streamingMessageId, setStreamingMessageId] = useState(null);
+  const [isNewsSearching, setIsNewsSearching] = useState(false);
+  const [newsSearchProgress, setNewsSearchProgress] = useState(0);
+  const [newsSearchType, setNewsSearchType] = useState('news'); // 'news' or 'internet'
 
   // Auto-save functionality
   useAutoSave(currentSessionId, messages, async (sessionId, msgs) => {
@@ -188,11 +191,39 @@ function App() {
             // Update the streaming message with new content
             updateStreamingMessage(aiMessageId, fullContent, false);
           },
+          // 🔍 Backend News Search Event Handlers
+          onNewsSearchStart: (searchData) => {
+            console.log('🔍 Backend news/internet search started:', searchData);
+            setIsNewsSearching(true);
+            setNewsSearchProgress(0);
+            setNewsSearchType(searchData?.searchType || 'news');
+          },
+          onNewsSearchProgress: (progressData) => {
+            console.log('📈 Backend search progress:', progressData);
+            if (progressData?.progress !== undefined) {
+              setNewsSearchProgress(progressData.progress);
+            }
+          },
+          onNewsSearchEnd: (searchResult) => {
+            console.log('✅ Backend search completed:', searchResult);
+            setIsNewsSearching(false);
+            setNewsSearchProgress(100);
+            // Keep progress visible for a moment then reset
+            setTimeout(() => {
+              setNewsSearchProgress(0);
+            }, 1500);
+          },
           onStreamEnd: (fullContent, enhancedData) => {
             console.log('✅ Enhanced streaming completed');
             updateStreamingMessage(aiMessageId, fullContent, true);
             setStreamingMessageId(null);
             setIsLoading(false);
+            
+            // Ensure news search is stopped if not already
+            if (isNewsSearching) {
+              setIsNewsSearching(false);
+              setNewsSearchProgress(0);
+            }
             
             // 🧠 Process enhanced analytics data from ultra-advanced backend
             if (enhancedData) {
@@ -212,6 +243,8 @@ function App() {
             updateStreamingMessage(aiMessageId, `Sorry, I encountered an error during streaming: ${error}`, true);
             setStreamingMessageId(null);
             setIsLoading(false);
+            setIsNewsSearching(false); // Stop news search indicator
+            setNewsSearchProgress(0);
           }
         });
         
@@ -223,6 +256,8 @@ function App() {
         updateStreamingMessage(aiMessageId, "Sorry, I encountered an error connecting to the backend. Please make sure the IslamicAI backend is running and try again.", true);
         setStreamingMessageId(null);
         setIsLoading(false);
+        setIsNewsSearching(false); // Stop news search indicator
+        setNewsSearchProgress(0);
       }
     }
   };
@@ -289,6 +324,9 @@ function App() {
           onSendMessage={addMessage}
           isLoading={isLoading}
           currentSessionId={currentSessionId}
+          isNewsSearching={isNewsSearching}
+          newsSearchProgress={newsSearchProgress}
+          newsSearchType={newsSearchType}
         />
       </main>
     </div>
