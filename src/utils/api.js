@@ -1,7 +1,7 @@
 // API utility functions for connecting to the IslamicAI backend
 
-const API_BASE_URL = 'https://islamicai.sohal70760.workers.dev'; // Production URL
-// const API_BASE_URL = 'http://127.0.0.1:8787'; // Local development URL
+// const API_BASE_URL = 'https://islamicai.sohal70760.workers.dev'; // Production URL
+const API_BASE_URL = 'http://127.0.0.1:8787'; // Local development URL
 
 /**
  * Send a message to the IslamicAI backend with streaming support
