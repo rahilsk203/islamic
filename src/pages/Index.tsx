@@ -117,6 +117,20 @@ const Index = () => {
       }
     } catch {}
     checkConnection();
+    
+    // Handle page visibility changes (back button, app switch, etc.)
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Page is hidden, clear any editing state
+        setEditing(null);
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   const checkConnection = async () => {

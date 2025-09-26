@@ -16,6 +16,7 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
   const { isKeyboardOpen, initialViewportHeight } = useMobileKeyboard();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const wasKeyboardOpenRef = useRef(false);
 
   const autoresizeTextarea = () => {
     const el = textareaRef.current;
@@ -42,11 +43,27 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
 
   // Additional effect to handle mobile keyboard changes
   useEffect(() => {
-    if (isKeyboardOpen && containerRef.current) {
-      // Scroll to input when keyboard opens to ensure it's visible
-      setTimeout(() => {
-        containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 100);
+    // Detect keyboard state changes
+    if (wasKeyboardOpenRef.current !== isKeyboardOpen) {
+      wasKeyboardOpenRef.current = isKeyboardOpen;
+      
+      if (isKeyboardOpen && containerRef.current) {
+        // Scroll to input when keyboard opens to ensure it's visible
+        setTimeout(() => {
+          containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      }
+      
+      // Force re-render by updating state if needed
+      if (textareaRef.current) {
+        // Trigger a small re-render to ensure UI updates
+        textareaRef.current.style.transition = 'all 0.1s ease';
+        setTimeout(() => {
+          if (textareaRef.current) {
+            textareaRef.current.style.transition = '';
+          }
+        }, 100);
+      }
     }
   }, [isKeyboardOpen]);
 
@@ -69,7 +86,7 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
     <div 
       ref={containerRef}
       className={`border-t border-border bg-chat-bg transition-all duration-300 ${
-        isKeyboardOpen ? 'fixed inset-x-0 bottom-0 pb-2 safe-bottom-padding' : ''
+        isKeyboardOpen ? 'fixed inset-x-0 bottom-0 pb-2 safe-bottom-padding keyboard-visible' : ''
       }`}
     >
       <div className={`max-w-4xl mx-auto p-4 ${isKeyboardOpen ? 'pb-2' : ''}`}>
@@ -84,7 +101,7 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
               }}
               onKeyDown={handleKeyDown}
               placeholder="Ask about Islam, Quran, etc..."
-              className="flex-1 min-h-[40px] resize-none overflow-hidden border-none bg-transparent p-3 text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="flex-1 min-h-[40px] resize-none overflow-hidden border-none bg-transparent p-3 text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 mobile-transition"
               rows={1}
               autoFocus={autoFocus}
             />

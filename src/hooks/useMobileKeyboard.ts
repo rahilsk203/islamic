@@ -8,6 +8,7 @@ export const useMobileKeyboard = () => {
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const [initialViewportHeight, setInitialViewportHeight] = useState(0);
   const [previousHeight, setPreviousHeight] = useState(0);
+  const [hasFocus, setHasFocus] = useState(false);
 
   const handleViewportChange = useCallback(() => {
     if (!window.visualViewport) return;
@@ -37,15 +38,23 @@ export const useMobileKeyboard = () => {
       setIsKeyboardOpen(keyboardState);
       setPreviousHeight(currentHeight);
     }
-  }, [initialViewportHeight, previousHeight]);
+    
+    // If there's a large increase in height and we had focus, keyboard likely closed
+    if (hasFocus && (currentHeight - previousHeight) > 100) {
+      setIsKeyboardOpen(false);
+      setPreviousHeight(currentHeight);
+    }
+  }, [initialViewportHeight, previousHeight, hasFocus]);
 
   // Fallback method using focus/blur events
   const handleInputFocus = useCallback(() => {
+    setHasFocus(true);
     // When an input is focused, keyboard is likely open
     setIsKeyboardOpen(true);
   }, []);
 
   const handleInputBlur = useCallback(() => {
+    setHasFocus(false);
     // When an input is blurred, keyboard is likely closed
     // But we need to be careful as blur can happen for other reasons
     setTimeout(() => {
@@ -59,6 +68,37 @@ export const useMobileKeyboard = () => {
       }
     }, 300); // Small delay to allow for viewport updates
   }, [previousHeight]);
+
+  // Handle back button press (Android) or other navigation events
+  const handleVisibilityChange = useCallback(() => {
+    if (document.hidden) {
+      // Page is hidden, keyboard likely closed
+      setIsKeyboardOpen(false);
+      setHasFocus(false);
+    }
+  }, []);
+
+  // Handle page blur/focus events
+  const handlePageBlur = useCallback(() => {
+    // When page loses focus, keyboard likely closed
+    setIsKeyboardOpen(false);
+    setHasFocus(false);
+  }, []);
+
+  const handlePageFocus = useCallback(() => {
+    // When page regains focus, check if input still has focus
+    setTimeout(() => {
+      if (document.activeElement && 
+          (document.activeElement.tagName === 'INPUT' || 
+           document.activeElement.tagName === 'TEXTAREA')) {
+        setHasFocus(true);
+        // Don't automatically set keyboard open here as it might not be
+      } else {
+        setIsKeyboardOpen(false);
+        setHasFocus(false);
+      }
+    }, 100);
+  }, []);
 
   useEffect(() => {
     // Only run on client-side
@@ -83,6 +123,7 @@ export const useMobileKeyboard = () => {
           setPreviousHeight(window.visualViewport.height);
           // Reset keyboard state after orientation change
           setIsKeyboardOpen(false);
+          setHasFocus(false);
         }
       }, 500); // Longer delay to ensure orientation change is complete
     };
@@ -93,14 +134,31 @@ export const useMobileKeyboard = () => {
     document.addEventListener('focusin', handleInputFocus);
     document.addEventListener('focusout', handleInputBlur);
     
+    // Handle visibility change (back button, app switch, etc.)
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Handle page blur/focus events
+    window.addEventListener('blur', handlePageBlur);
+    window.addEventListener('focus', handlePageFocus);
+    
     // Cleanup listener on unmount
     return () => {
       window.visualViewport?.removeEventListener('resize', handleViewportChange);
       window.removeEventListener('orientationchange', handleOrientationChange);
       document.removeEventListener('focusin', handleInputFocus);
       document.removeEventListener('focusout', handleInputBlur);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handlePageBlur);
+      window.removeEventListener('focus', handlePageFocus);
     };
-  }, [handleViewportChange, handleInputFocus, handleInputBlur]);
+  }, [
+    handleViewportChange, 
+    handleInputFocus, 
+    handleInputBlur, 
+    handleVisibilityChange,
+    handlePageBlur,
+    handlePageFocus
+  ]);
 
   return { isKeyboardOpen, initialViewportHeight };
 };
