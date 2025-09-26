@@ -25,7 +25,7 @@ This is the React frontend for IslamicAI, an Islamic Scholar assistant powered b
 ### Prerequisites
 
 - Node.js (v16 or higher)
-- npm or yarn
+- npm (v8 or higher) - This project should be built with npm, not yarn or bun
 
 ### Installation
 
@@ -39,7 +39,7 @@ This is the React frontend for IslamicAI, an Islamic Scholar assistant powered b
    cd clone-my-app-mate
    ```
 
-3. Install dependencies:
+3. Install dependencies with npm:
    ```bash
    npm install
    ```
@@ -86,6 +86,10 @@ src/
 ## Configuration
 
 The frontend connects to the IslamicAI backend at `https://islamicai.sohal70760.workers.dev`. You can modify this URL in the `src/pages/Index.tsx` file.
+
+## Deployment
+
+This project is configured for deployment to Cloudflare Pages. Make sure to use npm for building the project to avoid lockfile conflicts.
 
 ## Contributing
 
