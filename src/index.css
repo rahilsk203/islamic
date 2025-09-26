@@ -5,11 +5,11 @@
 /* Custom styles for IslamicAI */
 @layer components {
   .message-user {
-    @apply bg-blue-100 text-gray-900 rounded-2xl rounded-tr-none px-4 py-3 text-right max-w-full;
+    @apply bg-blue-100 text-gray-900 rounded-2xl rounded-tr-none px-4 py-3 text-right max-w-full break-words;
   }
   
   .message-bot {
-    @apply text-left;
+    @apply text-left break-words;
   }
   
   .sidebar-item {
@@ -245,6 +245,41 @@
     .mobile-focus {
       outline: none;
       box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
+    }
+  }
+  
+  /* Long text handling */
+  .long-text-container {
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  /* Textarea improvements */
+  textarea {
+    resize: none;
+  }
+  
+  /* Responsive design improvements */
+  @media screen and (max-width: 768px) {
+    .responsive-padding {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+    
+    .responsive-margin {
+      margin-left: 0.25rem;
+      margin-right: 0.25rem;
+    }
+  }
+  
+  /* Desktop-specific styles */
+  @media screen and (min-width: 769px) {
+    /* Ensure normal positioning on desktop */
+    .desktop-input {
+      position: relative;
+      width: 100%;
     }
   }
 }

@@ -18,12 +18,30 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
   const containerRef = useRef<HTMLDivElement>(null);
   const wasKeyboardOpenRef = useRef(false);
 
+  // Check if device is mobile
+  const isMobile = () => {
+    if (typeof window === 'undefined') return false;
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+
   const autoresizeTextarea = () => {
     const el = textareaRef.current;
     if (!el) return;
-    el.style.overflow = 'hidden';
+    
+    // Reset height to get accurate scrollHeight
     el.style.height = 'auto';
-    el.style.height = `${el.scrollHeight}px`;
+    
+    // Calculate max height based on viewport - only apply mobile-specific limits on mobile
+    const maxHeight = isMobile() && isKeyboardOpen 
+      ? Math.min(150, window.innerHeight * 0.3) 
+      : isMobile()
+      ? Math.min(150, window.innerHeight * 0.2)
+      : 150; // Fixed max height for desktop
+    
+    // Set height based on content
+    const newHeight = Math.min(el.scrollHeight, maxHeight);
+    el.style.height = `${newHeight}px`;
+    el.style.overflow = newHeight >= maxHeight ? 'auto' : 'hidden';
   };
 
   // Keep internal state in sync when controlled
@@ -39,10 +57,13 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
 
   useEffect(() => {
     autoresizeTextarea();
-  }, [message]);
+  }, [message, isKeyboardOpen]);
 
   // Additional effect to handle mobile keyboard changes
   useEffect(() => {
+    // Only apply on mobile devices
+    if (!isMobile()) return;
+    
     // Detect keyboard state changes
     if (wasKeyboardOpenRef.current !== isKeyboardOpen) {
       wasKeyboardOpenRef.current = isKeyboardOpen;
@@ -86,10 +107,10 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
     <div 
       ref={containerRef}
       className={`border-t border-border bg-chat-bg transition-all duration-300 ${
-        isKeyboardOpen ? 'fixed inset-x-0 bottom-0 pb-2 safe-bottom-padding keyboard-visible' : ''
+        isMobile() && isKeyboardOpen ? 'fixed inset-x-0 bottom-0 pb-2 safe-bottom-padding keyboard-visible' : ''
       }`}
     >
-      <div className={`max-w-4xl mx-auto p-4 ${isKeyboardOpen ? 'pb-2' : ''}`}>
+      <div className={`max-w-4xl mx-auto p-4 ${isMobile() && isKeyboardOpen ? 'pb-2' : ''}`}>
         <form onSubmit={handleSubmit} className="relative">
           <div className="flex items-end gap-3 bg-white border border-gray-300 rounded-2xl p-1 shadow-sm focus-within:ring-2 focus-within:ring-green-500 focus-within:border-green-500 transition-all">
             <Textarea
@@ -101,7 +122,7 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
               }}
               onKeyDown={handleKeyDown}
               placeholder="Ask about Islam, Quran, etc..."
-              className="flex-1 min-h-[40px] resize-none overflow-hidden border-none bg-transparent p-3 text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 mobile-transition"
+              className="flex-1 min-h-[40px] max-h-[150px] resize-none border-none bg-transparent p-3 text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 mobile-transition"
               rows={1}
               autoFocus={autoFocus}
             />
@@ -110,7 +131,7 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
               type="submit"
               size="icon"
               disabled={!message.trim()}
-              className="h-10 w-10 m-1 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:hover:bg-green-600 rounded-full transition-colors"
+              className="h-10 w-10 m-1 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:hover:bg-green-600 rounded-full transition-colors flex-shrink-0"
             >
               <SendIcon className="w-5 h-5" />
             </Button>

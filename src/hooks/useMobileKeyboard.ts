@@ -10,8 +10,15 @@ export const useMobileKeyboard = () => {
   const [previousHeight, setPreviousHeight] = useState(0);
   const [hasFocus, setHasFocus] = useState(false);
 
+  // Check if device is mobile
+  const isMobile = useCallback(() => {
+    if (typeof window === 'undefined') return false;
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  }, []);
+
   const handleViewportChange = useCallback(() => {
-    if (!window.visualViewport) return;
+    // Only apply on mobile devices
+    if (!isMobile() || !window.visualViewport) return;
     
     // Get current viewport dimensions
     const currentHeight = window.visualViewport.height;
@@ -44,16 +51,22 @@ export const useMobileKeyboard = () => {
       setIsKeyboardOpen(false);
       setPreviousHeight(currentHeight);
     }
-  }, [initialViewportHeight, previousHeight, hasFocus]);
+  }, [initialViewportHeight, previousHeight, hasFocus, isMobile]);
 
   // Fallback method using focus/blur events
   const handleInputFocus = useCallback(() => {
+    // Only apply on mobile devices
+    if (!isMobile()) return;
+    
     setHasFocus(true);
     // When an input is focused, keyboard is likely open
     setIsKeyboardOpen(true);
-  }, []);
+  }, [isMobile]);
 
   const handleInputBlur = useCallback(() => {
+    // Only apply on mobile devices
+    if (!isMobile()) return;
+    
     setHasFocus(false);
     // When an input is blurred, keyboard is likely closed
     // But we need to be careful as blur can happen for other reasons
@@ -67,25 +80,34 @@ export const useMobileKeyboard = () => {
         }
       }
     }, 300); // Small delay to allow for viewport updates
-  }, [previousHeight]);
+  }, [previousHeight, isMobile]);
 
   // Handle back button press (Android) or other navigation events
   const handleVisibilityChange = useCallback(() => {
+    // Only apply on mobile devices
+    if (!isMobile()) return;
+    
     if (document.hidden) {
       // Page is hidden, keyboard likely closed
       setIsKeyboardOpen(false);
       setHasFocus(false);
     }
-  }, []);
+  }, [isMobile]);
 
   // Handle page blur/focus events
   const handlePageBlur = useCallback(() => {
+    // Only apply on mobile devices
+    if (!isMobile()) return;
+    
     // When page loses focus, keyboard likely closed
     setIsKeyboardOpen(false);
     setHasFocus(false);
-  }, []);
+  }, [isMobile]);
 
   const handlePageFocus = useCallback(() => {
+    // Only apply on mobile devices
+    if (!isMobile()) return;
+    
     // When page regains focus, check if input still has focus
     setTimeout(() => {
       if (document.activeElement && 
@@ -98,11 +120,16 @@ export const useMobileKeyboard = () => {
         setHasFocus(false);
       }
     }, 100);
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
     // Only run on client-side
     if (typeof window === 'undefined' || !window.visualViewport) {
+      return;
+    }
+
+    // Don't apply on desktop
+    if (!isMobile()) {
       return;
     }
 
@@ -157,7 +184,8 @@ export const useMobileKeyboard = () => {
     handleInputBlur, 
     handleVisibilityChange,
     handlePageBlur,
-    handlePageFocus
+    handlePageFocus,
+    isMobile
   ]);
 
   return { isKeyboardOpen, initialViewportHeight };

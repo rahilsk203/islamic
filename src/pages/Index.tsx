@@ -439,7 +439,7 @@ const Index = () => {
         {/* Messages Container with Fixed Scrolling */}
         <div 
           ref={messagesContainerRef}
-          className="flex-1 overflow-y-auto bg-white min-h-0 overscroll-contain transform-gpu gpu-boost"
+          className="flex-1 overflow-y-auto bg-white min-h-0 overscroll-contain transform-gpu gpu-boost long-text-container"
           style={{ 
             marginBottom: isKeyboardOpen ? 'env(safe-area-inset-bottom)' : '0',
             paddingBottom: isKeyboardOpen ? '1rem' : '0'

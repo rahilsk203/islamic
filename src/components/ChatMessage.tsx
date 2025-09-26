@@ -51,9 +51,16 @@ const ChatMessageBase = ({ message, isUser = false, onRegenerate, onEditUser, on
   useEffect(() => {
     if (isEditing && textareaRef.current) {
       const el = textareaRef.current;
-      el.style.overflow = 'hidden';
+      // Reset height to get accurate scrollHeight
       el.style.height = 'auto';
-      el.style.height = `${el.scrollHeight}px`;
+      
+      // Calculate max height (30% of viewport height or 150px, whichever is smaller)
+      const maxHeight = Math.min(150, window.innerHeight * 0.3);
+      
+      // Set height based on content
+      const newHeight = Math.min(el.scrollHeight, maxHeight);
+      el.style.height = `${newHeight}px`;
+      el.style.overflow = newHeight >= maxHeight ? 'auto' : 'hidden';
     }
   }, [editText, isEditing]);
 
@@ -97,46 +104,47 @@ const ChatMessageBase = ({ message, isUser = false, onRegenerate, onEditUser, on
         <div className={isUser ? 'flex-shrink' : 'flex-1'}>
           {isEditing && isUser ? (
             // Edit mode for user messages
-            <div className="message-user inline-block w-full">
-              <div className="flex items-end gap-2 bg-transparent">
+            <div className="message-user inline-block w-full max-w-full">
+              <div className="flex flex-col gap-2 bg-transparent">
                 <Textarea
                   ref={textareaRef}
                   value={editText}
                   onChange={(e) => setEditText(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Edit your message..."
-                  className="flex-1 min-h-[40px] resize-none overflow-hidden border-none bg-transparent p-2 text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
-                  rows={1}
+                  className="min-h-[40px] max-h-[150px] resize-none border-none bg-transparent p-2 text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 w-full"
                   autoFocus
                 />
-                <div className="flex gap-1 mb-1">
+                <div className="flex gap-1 justify-end">
                   <Button
                     onClick={onCancelEdit}
-                    size="icon"
+                    size="sm"
                     variant="ghost"
-                    className="h-8 w-8 p-0 hover:bg-gray-200 text-gray-500 hover:text-gray-700"
+                    className="h-8 px-3 hover:bg-gray-200 text-gray-500 hover:text-gray-700"
                   >
-                    <XIcon className="w-4 h-4" />
+                    <XIcon className="w-4 h-4 mr-1" />
+                    Cancel
                   </Button>
                   <Button
                     onClick={handleSaveEdit}
-                    size="icon"
+                    size="sm"
                     disabled={!editText.trim()}
-                    className="h-8 w-8 p-0 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:hover:bg-green-600 rounded-full"
+                    className="h-8 px-3 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:hover:bg-green-600 rounded-full"
                   >
-                    <SendIcon className="w-4 h-4" />
+                    <SendIcon className="w-4 h-4 mr-1" />
+                    Send
                   </Button>
                 </div>
               </div>
             </div>
           ) : isUser ? (
             // Display mode for user messages
-            <div className="message-user inline-block">
-              <div className="whitespace-pre-wrap leading-relaxed">{message}</div>
+            <div className="message-user inline-block max-w-full">
+              <div className="whitespace-pre-wrap leading-relaxed break-words">{message}</div>
             </div>
           ) : (
             // Display mode for bot messages
-            <div className="">
+            <div className="max-w-full">
               <MarkdownMessage text={message} />
             </div>
           )}
