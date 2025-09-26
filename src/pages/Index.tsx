@@ -40,7 +40,7 @@ const Index = () => {
   const activeAbortRef = useRef<AbortController | null>(null);
 
   // Configuration - Update this to match your backend URL
-  const BACKEND_URL = 'https://islamicai.sohal70760.workers.dev';
+  const BACKEND_URL = 'http://127.0.0.1:8787';
 
   // Track whether user is near bottom to avoid forced scroll during read
   const isUserNearBottomRef = useRef(true);
@@ -370,7 +370,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="flex h-screen bg-white overflow-hidden">
+    <div className="flex min-h-[100dvh] h-full bg-white overflow-hidden">
       <ChatSidebar 
         isOpen={isSidebarOpen} 
         onClose={closeSidebar}
@@ -391,7 +391,7 @@ const Index = () => {
         {/* Messages Container with Fixed Scrolling */}
         <div 
           ref={messagesContainerRef}
-          className="flex-1 overflow-y-auto bg-white min-h-0"
+          className="flex-1 overflow-y-auto bg-white min-h-0 overscroll-contain transform-gpu gpu-boost"
         >
           <div className="max-w-4xl mx-auto px-4 py-6">
             {messages.map((msg, idx) => {

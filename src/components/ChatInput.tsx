@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SendIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,6 +12,15 @@ interface ChatInputProps {
 
 const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInputProps) => {
   const [message, setMessage] = useState(value ?? '');
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const autoresizeTextarea = () => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.overflow = 'hidden';
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  };
 
   // Keep internal state in sync when controlled
   if (value !== undefined && value !== message) {
@@ -19,6 +28,14 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
     // eslint-disable-next-line react-hooks/rules-of-hooks
     setMessage(value);
   }
+
+  useEffect(() => {
+    autoresizeTextarea();
+  }, []);
+
+  useEffect(() => {
+    autoresizeTextarea();
+  }, [message]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,14 +58,15 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
         <form onSubmit={handleSubmit} className="relative">
           <div className="flex items-end gap-3 bg-white border border-gray-300 rounded-2xl p-1 shadow-sm focus-within:ring-2 focus-within:ring-green-500 focus-within:border-green-500 transition-all">
             <Textarea
+              ref={textareaRef as any}
               value={message}
               onChange={(e) => {
                 setMessage(e.target.value);
                 onChangeValue?.(e.target.value);
               }}
               onKeyDown={handleKeyDown}
-              placeholder="Ask about Islam, Quran, Hadith, Prayer times, etc..."
-              className="flex-1 min-h-[40px] max-h-32 resize-none border-none bg-transparent p-3 text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
+              placeholder="Ask about Islam, Quran, etc..."
+              className="flex-1 min-h-[40px] resize-none overflow-hidden border-none bg-transparent p-3 text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
               rows={1}
               autoFocus={autoFocus}
             />

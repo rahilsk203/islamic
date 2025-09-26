@@ -10,16 +10,16 @@ const TypingIndicatorBase = () => {
           <BookOpenIcon className="w-5 h-5" />
         </div>
         
-        {/* Typing Animation */}
+        {/* Typing Animation (no background bubble) */}
         <div className="flex-1 max-w-[85%]">
-          <div className="rounded-2xl px-4 py-3 bg-white border border-gray-200 shadow-sm">
-             <div className="flex items-center space-x-1">
-               <div className="flex space-x-1">
-                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-               </div>
-             </div>
+          <div className="px-0 py-0">
+            <div className="flex items-center space-x-2">
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

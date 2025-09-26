@@ -1,7 +1,8 @@
 import { BookOpenIcon, PlusIcon, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { memo } from 'react';
 
-const ChatHeader = ({ onToggleSidebar, onNewChat }: { onToggleSidebar?: () => void; onNewChat?: () => void }) => {
+const ChatHeaderBase = ({ onToggleSidebar, onNewChat }: { onToggleSidebar?: () => void; onNewChat?: () => void }) => {
   return (
     <header className="h-16 bg-white border-b border-border flex items-center justify-between px-4 shadow-sm">
       <div className="flex items-center gap-3">
@@ -48,5 +49,6 @@ const ChatHeader = ({ onToggleSidebar, onNewChat }: { onToggleSidebar?: () => vo
     </header>
   );
 };
+const ChatHeader = memo(ChatHeaderBase);
 
 export default ChatHeader;

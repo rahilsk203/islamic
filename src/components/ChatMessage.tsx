@@ -3,10 +3,12 @@ import {
   DownloadIcon, 
   RefreshCwIcon, 
   BookOpenIcon,
-  UserIcon
+  UserIcon,
+  PencilIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { memo, useCallback } from 'react';
+import MarkdownMessage from '@/components/MarkdownMessage';
 
 interface ChatMessageProps {
   message: string;
@@ -52,14 +54,14 @@ const ChatMessageBase = ({ message, isUser = false, onRegenerate, onEditUser }: 
           )}
         </div>
         
-        {/* Message Content */}
+        {/* Message Content (minimal, ChatGPT-like: no background bubbles) */}
         <div className="flex-1 max-w-[85%]">
-          <div className={`rounded-2xl px-4 py-3 ${
-            isUser
-              ? 'bg-gray-100 text-foreground border border-gray-200'
-              : 'bg-white border border-gray-200 shadow-sm'
-          }`}>
-            <div className="whitespace-pre-wrap">{message}</div>
+          <div className={isUser ? 'text-gray-900' : 'text-gray-900'}>
+            {isUser ? (
+              <div className="whitespace-pre-wrap leading-relaxed">{message}</div>
+            ) : (
+              <MarkdownMessage text={message} />
+            )}
           </div>
           
           {/* Action Buttons */}
@@ -77,8 +79,8 @@ const ChatMessageBase = ({ message, isUser = false, onRegenerate, onEditUser }: 
             </div>
           ) : (
             <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button onClick={onEditUser} variant="ghost" size="sm" className="h-7 px-2 text-xs text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded">
-                Edit
+              <Button onClick={onEditUser} variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100 text-gray-500 hover:text-gray-700">
+                <PencilIcon className="w-4 h-4" />
               </Button>
             </div>
           )}

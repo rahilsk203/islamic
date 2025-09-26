@@ -19,9 +19,30 @@
   .sidebar-item-active {
     @apply bg-green-50 border border-green-200;
   }
+  .gpu-boost {
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+  }
 }
 
 @layer base {
+  html, body, #root {
+    height: 100%;
+    overflow: hidden; /* lock page scroll; we'll scroll the messages container */
+  }
+
+  /* Mobile viewport stability and safe areas */
+  html {
+    min-height: 100%;
+  }
+
+  body {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
   :root {
     /* IslamicAI color palette */
     --background: 0 0% 100%;
