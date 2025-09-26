@@ -1,114 +1,134 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Enhanced Mobile-First CSS Reset */
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
-
-html {
-  font-size: 16px;
-  scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #f8fafc;
-  overscroll-behavior: none;
-}
-
-/* Mobile Safe Area Support */
-@supports (padding: max(0px)) {
-  .safe-area-inset-top {
-    padding-top: max(1rem, env(safe-area-inset-top));
+/* Custom styles for IslamicAI */
+@layer components {
+  .message-user {
+    @apply bg-green-500 text-white rounded-2xl rounded-tr-none px-4 py-3;
   }
   
-  .safe-area-inset-bottom {
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  .message-bot {
+    @apply bg-white border border-gray-200 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm;
   }
   
-  .safe-area-inset-left {
-    padding-left: max(1rem, env(safe-area-inset-left));
+  .sidebar-item {
+    @apply flex items-center gap-3 w-full h-12 px-3 rounded-xl hover:bg-green-50 transition-colors;
   }
   
-  .safe-area-inset-right {
-    padding-right: max(1rem, env(safe-area-inset-right));
+  .sidebar-item-active {
+    @apply bg-green-50 border border-green-200;
   }
 }
 
-/* Touch Interaction Optimization */
-.touch-manipulation {
-  touch-action: manipulation;
-  -webkit-user-select: none;
-  user-select: none;
+@layer base {
+  :root {
+    /* IslamicAI color palette */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 13%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 13%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 13%;
+
+    --primary: 120 100% 25%; /* Green color for Islamic theme */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 13%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 13%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 95%;
+    --ring: 120 100% 25%; /* Green color for Islamic theme */
+
+    --radius: 0.75rem;
+
+    /* IslamicAI specific colors */
+    --sidebar-bg: 0 0% 100%; /* White background */
+    --sidebar-text: 0 0% 13%;
+    --sidebar-text-muted: 0 0% 50%;
+    --sidebar-hover: 120 30% 95%; /* Light green hover */
+    --sidebar-active: 120 40% 90%; /* Medium green active */
+    --chat-bg: 0 0% 100%;
+    --message-hover: 120 20% 98%; /* Very light green hover */
+    --input-bg: 0 0% 100%;
+    --input-border: 0 0% 85%;
+    --input-focus: 120 100% 25%; /* Green color for Islamic theme */
+
+    /* Sidebar variables for compatibility */
+    --sidebar-background: var(--sidebar-bg);
+    --sidebar-foreground: var(--sidebar-text);
+    --sidebar-primary: 0 0% 13%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: var(--sidebar-hover);
+    --sidebar-accent-foreground: var(--sidebar-text);
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 120 100% 25%;
+  }
+
+  .dark {
+    --background: 0 0% 10%;
+    --foreground: 0 0% 90%;
+
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 90%;
+
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 90%;
+
+    --primary: 120 100% 40%; /* Bright green for dark mode */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 90%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 70%;
+
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 90%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 90%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 120 100% 40%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 85%;
+    --sidebar-primary: 0 0% 90%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent-foreground: 0 0% 85%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 120 100% 40%;
+  }
 }
 
-.touch-button {
-  min-width: 44px;
-  min-height: 44px;
-  touch-action: manipulation;
-}
+@layer base {
+  * {
+    @apply border-border;
+  }
 
-/* Enhanced Mobile Scrolling */
-.mobile-scroll {
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-
-/* Mobile Input Optimization */
-.mobile-input {
-  font-size: 16px !important; /* Prevents zoom on iOS */
-  -webkit-appearance: none;
-  border-radius: 0;
-}
-
-/* Mobile Header Sticky Fix */
-.mobile-header-sticky {
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-/* Mobile Sidebar Overlay */
-.sidebar-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 40;
-  background: rgba(0, 0, 0, 0.5);
-  transition: opacity 0.3s ease;
-}
-
-/* Performance Optimizations */
-.will-change-transform {
-  will-change: transform;
-}
-
-.will-change-opacity {
-  will-change: opacity;
-}
-
-.gpu-accelerated {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  perspective: 1000px;
-}
-
-/* Custom Scrollbar for Mobile */
-@media (max-width: 768px) {
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  }
+  
+  /* Custom scrollbar */
   ::-webkit-scrollbar {
-    width: 2px;
+    width: 8px;
   }
   
   ::-webkit-scrollbar-track {
@@ -116,18 +136,11 @@ body {
   }
   
   ::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 1px;
+    background: #cbd5e1;
+    border-radius: 4px;
   }
-}
-
-/* Mobile Animation Optimization */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
   }
 }
