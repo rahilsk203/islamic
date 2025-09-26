@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { SendIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { useMobileKeyboard } from '@/hooks';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -12,6 +13,7 @@ interface ChatInputProps {
 
 const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInputProps) => {
   const [message, setMessage] = useState(value ?? '');
+  const { isKeyboardOpen } = useMobileKeyboard();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const autoresizeTextarea = () => {
@@ -53,8 +55,8 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
   };
 
   return (
-    <div className="border-t border-border bg-chat-bg">
-      <div className="max-w-4xl mx-auto p-4">
+    <div className={`border-t border-border bg-chat-bg transition-all duration-300 ${isKeyboardOpen ? 'fixed inset-x-0 bottom-0' : ''}`}>
+      <div className={`max-w-4xl mx-auto p-4 ${isKeyboardOpen ? 'pb-2' : ''}`}>
         <form onSubmit={handleSubmit} className="relative">
           <div className="flex items-end gap-3 bg-white border border-gray-300 rounded-2xl p-1 shadow-sm focus-within:ring-2 focus-within:ring-green-500 focus-within:border-green-500 transition-all">
             <Textarea
@@ -82,12 +84,14 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
           </div>
         </form>
         
-        <div className="text-xs text-center text-muted-foreground mt-3">
-          IslamicAI can make mistakes. Verify important information.{' '}
-          <button className="underline hover:no-underline">
-            See Usage Guidelines
-          </button>
-        </div>
+        {!isKeyboardOpen && (
+          <div className="text-xs text-center text-muted-foreground mt-3">
+            IslamicAI can make mistakes. Verify important information.{' '}
+            <button className="underline hover:no-underline">
+              See Usage Guidelines
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

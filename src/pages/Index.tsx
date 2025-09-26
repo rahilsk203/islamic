@@ -5,6 +5,7 @@ import ChatHeader from '@/components/ChatHeader';
 import ChatMessage from '@/components/ChatMessage';
 import ChatInput from '@/components/ChatInput';
 import TypingIndicator from '@/components/TypingIndicator';
+import { useMobileKeyboard } from '@/hooks';
 
 interface Message {
   id: number;
@@ -35,6 +36,7 @@ const Index = () => {
   const [showTyping, setShowTyping] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('Connecting to backend...');
   const [editing, setEditing] = useState<{ index: number; text: string } | null>(null);
+  const { isKeyboardOpen } = useMobileKeyboard();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const activeAbortRef = useRef<AbortController | null>(null);
@@ -77,8 +79,11 @@ const Index = () => {
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
+    // Only scroll to bottom if keyboard is not open to prevent jumping
+    if (!isKeyboardOpen) {
+      scrollToBottom();
+    }
+  }, [messages, scrollToBottom, isKeyboardOpen]);
 
   // Debounced persistence of session
   const persistSessionDebounced = useRef(
@@ -392,6 +397,7 @@ const Index = () => {
         <div 
           ref={messagesContainerRef}
           className="flex-1 overflow-y-auto bg-white min-h-0 overscroll-contain transform-gpu gpu-boost"
+          style={{ marginBottom: isKeyboardOpen ? 'env(safe-area-inset-bottom)' : '0' }}
         >
           <div className="max-w-4xl mx-auto px-4 py-6">
             {messages.map((msg, idx) => {
