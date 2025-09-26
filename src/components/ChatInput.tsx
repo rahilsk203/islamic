@@ -12,7 +12,7 @@ interface ChatInputProps {
 }
 
 const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInputProps) => {
-  const [message, setMessage] = useState(value ?? '');
+  const [message, setMessage] = useState('');
   const { isKeyboardOpen } = useMobileKeyboard();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -25,11 +25,11 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
   };
 
   // Keep internal state in sync when controlled
-  if (value !== undefined && value !== message) {
-    // Avoid infinite loops by only setting when different
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    setMessage(value);
-  }
+  useEffect(() => {
+    if (value !== undefined) {
+      setMessage(value);
+    }
+  }, [value]);
 
   useEffect(() => {
     autoresizeTextarea();
@@ -43,7 +43,7 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
     e.preventDefault();
     if (message.trim()) {
       onSendMessage(message.trim());
-      setMessage('');
+      setMessage(''); // Always clear the input after sending
     }
   };
 

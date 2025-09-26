@@ -158,20 +158,23 @@ const Index = () => {
   const handleSendMessage = useCallback(async (message: string, options?: { echoUser?: boolean; insertAtIndex?: number; force?: boolean }) => {
     if (!message.trim() || (isSending && !options?.force)) return;
     
-    const userMessage: Message = {
-      id: messages.length + 1,
-      message: message.trim(),
-      isUser: true
-    };
-    
-    // Auto-generate title from first user message
-    if (messages.length <= 1) {
-      setSessionTitle(prev => (prev === 'New Chat' ? generateSessionTitleFromMessage(userMessage.message) : prev));
-    }
-    // Add user message to chat unless suppressed
+    // Only create userMessage if we're not in editing mode or echoUser is not false
+    let userMessage: Message | null = null;
     if (options?.echoUser !== false) {
-      setMessages(prev => [...prev, userMessage]);
+      userMessage = {
+        id: messages.length + 1,
+        message: message.trim(),
+        isUser: true
+      };
+      
+      // Auto-generate title from first user message
+      if (messages.length <= 1) {
+        setSessionTitle(prev => (prev === 'New Chat' ? generateSessionTitleFromMessage(userMessage!.message) : prev));
+      }
+      // Add user message to chat unless suppressed
+      setMessages(prev => [...prev, userMessage!]);
     }
+    
     // If forcing (regenerate), abort any in-flight request
     if (options?.force && activeAbortRef.current) {
       try { activeAbortRef.current.abort(); } catch {}
@@ -374,6 +377,29 @@ const Index = () => {
     setIsSidebarOpen(false);
   }, []);
 
+  const cancelEdit = useCallback(() => {
+    setEditing(null);
+  }, []);
+
+  const saveEdit = useCallback((index: number, newMessage: string) => {
+    // Remove all messages after the edited message and update the edited message
+    setMessages(prev => {
+      // Keep messages up to and including the edited message
+      const messagesUpToEdited = prev.slice(0, index + 1);
+      // Replace the edited message
+      messagesUpToEdited[index] = {
+        ...messagesUpToEdited[index],
+        message: newMessage
+      };
+      return messagesUpToEdited;
+    });
+    
+    setEditing(null);
+    
+    // Regenerate AI response for this edited user message
+    handleSendMessage(newMessage, { echoUser: false, insertAtIndex: index + 1, force: true });
+  }, [handleSendMessage]);
+
   return (
     <div className="flex min-h-[100dvh] h-full bg-white overflow-hidden">
       <ChatSidebar 
@@ -423,6 +449,16 @@ const Index = () => {
                     setEditing({ index: idx, text: msg.message });
                   }
                 : undefined;
+              const onCancelEdit = msg.isUser
+                ? () => {
+                    cancelEdit();
+                  }
+                : undefined;
+              const onSaveEdit = msg.isUser
+                ? (newMessage: string) => {
+                    saveEdit(idx, newMessage);
+                  }
+                : undefined;
               return (
                 <div key={msg.id} className="mb-6">
                   <ChatMessage 
@@ -430,6 +466,9 @@ const Index = () => {
                     isUser={msg.isUser} 
                     onRegenerate={onRegenerate}
                     onEditUser={onEditUser}
+                    onCancelEdit={onCancelEdit}
+                    onSaveEdit={onSaveEdit}
+                    isEditing={editing?.index === idx}
                   />
                 </div>
               );
@@ -448,17 +487,25 @@ const Index = () => {
           <ChatInput 
             onSendMessage={(m) => {
               if (editing) {
-                // Keep UI as-is until confirm send; then replace and truncate
-                setMessages(prev => prev.map((x, i) => i === editing.index ? { ...x, message: m } : x).slice(0, editing.index + 1));
-                // regenerate AI for this edited user message
+                // When editing, replace the message and remove all subsequent messages
+                setMessages(prev => {
+                  // Keep messages up to and including the edited message
+                  const messagesUpToEdited = prev.slice(0, editing.index + 1);
+                  // Replace the edited message
+                  messagesUpToEdited[editing.index] = {
+                    ...messagesUpToEdited[editing.index],
+                    message: m
+                  };
+                  return messagesUpToEdited;
+                });
+                // Clear editing state
                 setEditing(null);
+                // Regenerate AI response for this edited user message
                 handleSendMessage(m, { echoUser: false, insertAtIndex: editing.index + 1, force: true });
               } else {
                 handleSendMessage(m);
               }
             }}
-            value={editing ? editing.text : undefined}
-            onChangeValue={editing ? (v) => setEditing({ index: editing.index, text: v }) : undefined}
             autoFocus={!!editing}
           />
         </div>

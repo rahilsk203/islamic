@@ -4,10 +4,13 @@ import {
   RefreshCwIcon, 
   BookOpenIcon,
   UserIcon,
-  PencilIcon
+  PencilIcon,
+  XIcon,
+  SendIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { memo, useCallback } from 'react';
+import { Textarea } from '@/components/ui/textarea';
+import { memo, useCallback, useState, useEffect, useRef } from 'react';
 import MarkdownMessage from '@/components/MarkdownMessage';
 
 interface ChatMessageProps {
@@ -15,9 +18,15 @@ interface ChatMessageProps {
   isUser?: boolean;
   onRegenerate?: () => void;
   onEditUser?: () => void;
+  onCancelEdit?: () => void;
+  onSaveEdit?: (newMessage: string) => void;
+  isEditing?: boolean;
 }
 
-const ChatMessageBase = ({ message, isUser = false, onRegenerate, onEditUser }: ChatMessageProps) => {
+const ChatMessageBase = ({ message, isUser = false, onRegenerate, onEditUser, onCancelEdit, onSaveEdit, isEditing }: ChatMessageProps) => {
+  const [editText, setEditText] = useState(message);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(message);
@@ -38,9 +47,39 @@ const ChatMessageBase = ({ message, isUser = false, onRegenerate, onEditUser }: 
     } catch {}
   }, [message]);
 
+  // Auto-resize textarea when editing
+  useEffect(() => {
+    if (isEditing && textareaRef.current) {
+      const el = textareaRef.current;
+      el.style.overflow = 'hidden';
+      el.style.height = 'auto';
+      el.style.height = `${el.scrollHeight}px`;
+    }
+  }, [editText, isEditing]);
+
+  // Reset edit text when message changes or editing is canceled
+  useEffect(() => {
+    if (!isEditing) {
+      setEditText(message);
+    }
+  }, [message, isEditing]);
+
+  const handleSaveEdit = () => {
+    if (editText.trim() && onSaveEdit) {
+      onSaveEdit(editText.trim());
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSaveEdit();
+    }
+  };
+
   return (
-    <div className={`group ${isUser ? 'ml-auto' : ''}`}>
-      <div className={`flex gap-4 ${isUser ? 'flex-row-reverse' : ''}`}>
+    <div className={`group ${isUser ? 'flex justify-end' : 'flex justify-start'}`}>
+      <div className={`flex gap-4 ${isUser ? 'flex-row-reverse' : ''} ${isUser ? 'w-auto' : 'max-w-[85%] w-full'}`}>
         {/* Avatar */}
         <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
           isUser 
@@ -54,34 +93,74 @@ const ChatMessageBase = ({ message, isUser = false, onRegenerate, onEditUser }: 
           )}
         </div>
         
-        {/* Message Content (minimal, ChatGPT-like: no background bubbles) */}
-        <div className="flex-1 max-w-[85%]">
-          <div className={isUser ? 'text-gray-900' : 'text-gray-900'}>
-            {isUser ? (
+        {/* Message Content */}
+        <div className={isUser ? 'flex-shrink' : 'flex-1'}>
+          {isEditing && isUser ? (
+            // Edit mode for user messages
+            <div className="message-user inline-block w-full">
+              <div className="flex items-end gap-2 bg-transparent">
+                <Textarea
+                  ref={textareaRef}
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Edit your message..."
+                  className="flex-1 min-h-[40px] resize-none overflow-hidden border-none bg-transparent p-2 text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
+                  rows={1}
+                  autoFocus
+                />
+                <div className="flex gap-1 mb-1">
+                  <Button
+                    onClick={onCancelEdit}
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 p-0 hover:bg-gray-200 text-gray-500 hover:text-gray-700"
+                  >
+                    <XIcon className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    onClick={handleSaveEdit}
+                    size="icon"
+                    disabled={!editText.trim()}
+                    className="h-8 w-8 p-0 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:hover:bg-green-600 rounded-full"
+                  >
+                    <SendIcon className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : isUser ? (
+            // Display mode for user messages
+            <div className="message-user inline-block">
               <div className="whitespace-pre-wrap leading-relaxed">{message}</div>
-            ) : (
-              <MarkdownMessage text={message} />
-            )}
-          </div>
-          
-          {/* Action Buttons */}
-          {!isUser ? (
-            <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button onClick={handleCopy} variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100 text-gray-500 hover:text-gray-700">
-                <CopyIcon className="w-4 h-4" />
-              </Button>
-              <Button onClick={handleDownload} variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100 text-gray-500 hover:text-gray-700">
-                <DownloadIcon className="w-4 h-4" />
-              </Button>
-              <Button onClick={onRegenerate} variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100 text-gray-500 hover:text-gray-700">
-                <RefreshCwIcon className="w-4 h-4" />
-              </Button>
             </div>
           ) : (
-            <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button onClick={onEditUser} variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100 text-gray-500 hover:text-gray-700">
-                <PencilIcon className="w-4 h-4" />
-              </Button>
+            // Display mode for bot messages
+            <div className="">
+              <MarkdownMessage text={message} />
+            </div>
+          )}
+          
+          {/* Action Buttons */}
+          {!isEditing && (
+            <div className={`flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity ${isUser ? 'justify-end' : 'justify-start'}`}>
+              {!isUser ? (
+                <>
+                  <Button onClick={handleCopy} variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100 text-gray-500 hover:text-gray-700">
+                    <CopyIcon className="w-4 h-4" />
+                  </Button>
+                  <Button onClick={handleDownload} variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100 text-gray-500 hover:text-gray-700">
+                    <DownloadIcon className="w-4 h-4" />
+                  </Button>
+                  <Button onClick={onRegenerate} variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100 text-gray-500 hover:text-gray-700">
+                    <RefreshCwIcon className="w-4 h-4" />
+                  </Button>
+                </>
+              ) : (
+                <Button onClick={onEditUser} variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100 text-gray-500 hover:text-gray-700">
+                  <PencilIcon className="w-4 h-4" />
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -91,7 +170,9 @@ const ChatMessageBase = ({ message, isUser = false, onRegenerate, onEditUser }: 
 };
 
 const areEqual = (prev: ChatMessageProps, next: ChatMessageProps) => {
-  return prev.isUser === next.isUser && prev.message === next.message;
+  return prev.isUser === next.isUser && 
+         prev.message === next.message && 
+         prev.isEditing === next.isEditing;
 };
 
 const ChatMessage = memo(ChatMessageBase, areEqual);

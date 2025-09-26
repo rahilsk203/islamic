@@ -5,11 +5,11 @@
 /* Custom styles for IslamicAI */
 @layer components {
   .message-user {
-    @apply bg-green-500 text-white rounded-2xl rounded-tr-none px-4 py-3;
+    @apply bg-blue-100 text-gray-900 rounded-2xl rounded-tr-none px-4 py-3 text-right max-w-full;
   }
   
   .message-bot {
-    @apply bg-white border border-gray-200 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm;
+    @apply text-left;
   }
   
   .sidebar-item {
