@@ -197,6 +197,11 @@
     .safe-bottom-padding {
       padding-bottom: max(16px, env(safe-area-inset-bottom));
     }
+    
+    /* Smooth transition for mobile keyboard */
+    .mobile-transition {
+      transition: all 0.3s ease-out;
+    }
   }
   
   /* Enhanced mobile input handling */
@@ -209,6 +214,25 @@
     /* Better handling for virtual keyboard */
     .mobile-input-container {
       transition: all 0.3s ease;
+    }
+    
+    /* Ensure input is visible when keyboard is open */
+    .keyboard-visible {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+    }
+  }
+  
+  /* Global styles for better mobile experience */
+  @media screen and (max-width: 768px) {
+    /* Prevent scrolling issues on mobile */
+    .mobile-no-scroll {
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
     }
   }
 }

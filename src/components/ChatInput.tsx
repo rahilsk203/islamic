@@ -13,8 +13,9 @@ interface ChatInputProps {
 
 const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInputProps) => {
   const [message, setMessage] = useState('');
-  const { isKeyboardOpen } = useMobileKeyboard();
+  const { isKeyboardOpen, initialViewportHeight } = useMobileKeyboard();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const autoresizeTextarea = () => {
     const el = textareaRef.current;
@@ -39,6 +40,16 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
     autoresizeTextarea();
   }, [message]);
 
+  // Additional effect to handle mobile keyboard changes
+  useEffect(() => {
+    if (isKeyboardOpen && containerRef.current) {
+      // Scroll to input when keyboard opens to ensure it's visible
+      setTimeout(() => {
+        containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }, [isKeyboardOpen]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim()) {
@@ -56,6 +67,7 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
 
   return (
     <div 
+      ref={containerRef}
       className={`border-t border-border bg-chat-bg transition-all duration-300 ${
         isKeyboardOpen ? 'fixed inset-x-0 bottom-0 pb-2 safe-bottom-padding' : ''
       }`}

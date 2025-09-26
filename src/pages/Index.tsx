@@ -81,7 +81,10 @@ const Index = () => {
   useEffect(() => {
     // Only scroll to bottom if keyboard is not open to prevent jumping
     if (!isKeyboardOpen) {
-      scrollToBottom();
+      // Small delay to ensure DOM is updated
+      setTimeout(() => {
+        scrollToBottom(false);
+      }, 50);
     }
   }, [messages, scrollToBottom, isKeyboardOpen]);
 
