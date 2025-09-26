@@ -40,7 +40,7 @@ const Index = () => {
   const activeAbortRef = useRef<AbortController | null>(null);
 
   // Configuration - Update this to match your backend URL
-  const BACKEND_URL = 'http://127.0.0.1:8787';
+  const BACKEND_URL = 'https://islamicai.sohal70760.workers.dev';
 
   // Track whether user is near bottom to avoid forced scroll during read
   const isUserNearBottomRef = useRef(true);
