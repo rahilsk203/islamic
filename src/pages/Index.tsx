@@ -423,7 +423,10 @@ const Index = () => {
         <div 
           ref={messagesContainerRef}
           className="flex-1 overflow-y-auto bg-white min-h-0 overscroll-contain transform-gpu gpu-boost"
-          style={{ marginBottom: isKeyboardOpen ? 'env(safe-area-inset-bottom)' : '0' }}
+          style={{ 
+            marginBottom: isKeyboardOpen ? 'env(safe-area-inset-bottom)' : '0',
+            paddingBottom: isKeyboardOpen ? '1rem' : '0'
+          }}
         >
           <div className="max-w-4xl mx-auto px-4 py-6">
             {messages.map((msg, idx) => {

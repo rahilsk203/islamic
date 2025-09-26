@@ -192,5 +192,23 @@
       left: 0;
       right: 0;
     }
+    
+    /* Safe area padding for mobile devices */
+    .safe-bottom-padding {
+      padding-bottom: max(16px, env(safe-area-inset-bottom));
+    }
+  }
+  
+  /* Enhanced mobile input handling */
+  @media screen and (max-width: 768px) {
+    /* Prevent input zoom on iOS */
+    input, textarea, select {
+      font-size: 16px;
+    }
+    
+    /* Better handling for virtual keyboard */
+    .mobile-input-container {
+      transition: all 0.3s ease;
+    }
   }
 }

@@ -55,7 +55,11 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
   };
 
   return (
-    <div className={`border-t border-border bg-chat-bg transition-all duration-300 ${isKeyboardOpen ? 'fixed inset-x-0 bottom-0' : ''}`}>
+    <div 
+      className={`border-t border-border bg-chat-bg transition-all duration-300 ${
+        isKeyboardOpen ? 'fixed inset-x-0 bottom-0 pb-2 safe-bottom-padding' : ''
+      }`}
+    >
       <div className={`max-w-4xl mx-auto p-4 ${isKeyboardOpen ? 'pb-2' : ''}`}>
         <form onSubmit={handleSubmit} className="relative">
           <div className="flex items-end gap-3 bg-white border border-gray-300 rounded-2xl p-1 shadow-sm focus-within:ring-2 focus-within:ring-green-500 focus-within:border-green-500 transition-all">
