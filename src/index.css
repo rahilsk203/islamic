@@ -8,6 +8,10 @@
     @apply bg-blue-100 text-gray-900 rounded-2xl rounded-tr-none px-4 py-3 text-right max-w-full break-words;
   }
   
+  .message-user-editing {
+    @apply bg-blue-50 border-2 border-blue-300 rounded-2xl px-4 py-3;
+  }
+  
   .message-bot {
     @apply text-left break-words;
   }
@@ -222,7 +226,6 @@
       bottom: 0;
       left: 0;
       right: 0;
-      z-index: 50;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
@@ -281,5 +284,10 @@
       position: relative;
       width: 100%;
     }
+  }
+  
+  /* Custom z-index classes */
+  .z-60 {
+    z-index: 60;
   }
 }

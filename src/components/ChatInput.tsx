@@ -9,9 +9,10 @@ interface ChatInputProps {
   value?: string;
   onChangeValue?: (value: string) => void;
   autoFocus?: boolean;
+  isSidebarOpen?: boolean; // Add this prop
 }
 
-const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInputProps) => {
+const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus, isSidebarOpen }: ChatInputProps) => {
   const [message, setMessage] = useState('');
   const { isKeyboardOpen, initialViewportHeight } = useMobileKeyboard();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -103,12 +104,28 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
     }
   };
 
+  // Determine the appropriate z-index based on sidebar state and keyboard visibility
+  const getInputContainerClasses = () => {
+    let classes = "border-t border-border bg-chat-bg transition-all duration-300 ";
+    
+    if (isMobile() && isKeyboardOpen) {
+      classes += "fixed inset-x-0 bottom-0 pb-2 safe-bottom-padding keyboard-visible ";
+      
+      // When sidebar is open and keyboard is visible, adjust z-index to prevent overlap
+      if (isSidebarOpen) {
+        classes += "z-60 "; // Higher than sidebar z-50
+      } else {
+        classes += "z-50 ";
+      }
+    }
+    
+    return classes;
+  };
+
   return (
     <div 
       ref={containerRef}
-      className={`border-t border-border bg-chat-bg transition-all duration-300 ${
-        isMobile() && isKeyboardOpen ? 'fixed inset-x-0 bottom-0 pb-2 safe-bottom-padding keyboard-visible' : ''
-      }`}
+      className={getInputContainerClasses()}
     >
       <div className={`max-w-4xl mx-auto p-4 ${isMobile() && isKeyboardOpen ? 'pb-2' : ''}`}>
         <form onSubmit={handleSubmit} className="relative">

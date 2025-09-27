@@ -527,6 +527,7 @@ const Index = () => {
               }
             }}
             autoFocus={!!editing}
+            isSidebarOpen={isSidebarOpen} // Pass the sidebar state
           />
         </div>
       </div>
