@@ -1,103 +1,127 @@
 # IslamicAI Frontend
 
-This is the React frontend for IslamicAI, an Islamic Scholar assistant powered by AI.
+This is the frontend application for IslamicAI, a React-based chat interface for interacting with the IslamicAI backend.
 
 ## Features
 
-- Chat interface with IslamicAI
-- Session management
-- Location detection for prayer times
-- Islamic resource navigation (Quran, Hadith, Seerah)
-- Responsive design for all devices
+- Real-time chat interface with IslamicAI
+- User authentication (Login/Signup)
+- Google Sign-In integration
+- Personalized preferences (language, madhhab, interests)
+- Session management with local storage
+- Message editing and regeneration
+- Typing indicators and smooth scrolling
 
-## Tech Stack
+## Prerequisites
 
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- Shadcn/ui components
-- React Router
-- TanStack Query
+- Node.js (version 18 or higher)
+- npm or yarn
 
-## Getting Started
+## Installation
 
-### Prerequisites
-
-- Node.js (v16 or higher)
-- npm (v8 or higher) - This project should be built with npm, not yarn or bun
-
-### Installation
-
-1. Clone the repository:
+1. Navigate to the frontend directory:
    ```bash
-   git clone <repository-url>
+   cd islamic
    ```
 
-2. Navigate to the project directory:
-   ```bash
-   cd clone-my-app-mate
-   ```
-
-3. Install dependencies with npm:
+2. Install dependencies:
    ```bash
    npm install
    ```
 
-### Development
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-To start the development server:
+## Configuration
 
-```bash
-npm run dev
+The frontend is configured to connect to the backend at `http://127.0.0.1:8787` by default. To change this:
+
+1. Update the `BACKEND_URL` in `src/pages/Index.tsx`
+2. Update the `BACKEND_URL` in `src/contexts/AuthContext.tsx`
+3. Update the `BACKEND_URL` in `src/App.tsx`
+
+For Google Sign-In, you need to:
+
+1. Create a Google OAuth client ID in the Google Cloud Console
+2. Update the client ID in:
+   - `src/components/AuthModal.tsx`
+   - `src/pages/Login.tsx`
+
+## Authentication
+
+The frontend supports three authentication methods:
+
+1. **Email/Password**: Traditional signup and login
+2. **Google Sign-In**: OAuth integration with Google accounts
+
+### User Preferences
+
+Authenticated users can set preferences that enhance their experience:
+
+- **Language**: Choose from English, Hindi, Bengali, or Hinglish
+- **Madhhab**: Select your preferred school of Islamic jurisprudence
+- **Interests**: Specify topics of interest (e.g., Fiqh, Tafsir, Islamic history)
+
+## Development
+
+### Project Structure
+
+```
+src/
+├── components/     # React components
+├── contexts/       # React context providers
+├── hooks/          # Custom React hooks
+├── lib/            # Utility functions
+├── pages/          # Page components
+└── App.tsx         # Main application component
 ```
 
-The application will be available at `http://localhost:5173`.
+### Available Scripts
 
-### Building for Production
+- `npm run dev`: Start development server
+- `npm run build`: Build for production
+- `npm run preview`: Preview production build
+- `npm run lint`: Run ESLint
+- `npm run type-check`: Run TypeScript type checking
 
-To create a production build:
+## Deployment
+
+To build for production:
 
 ```bash
 npm run build
 ```
 
-### Previewing Production Build
+The built files will be in the `dist/` directory.
 
-To preview the production build locally:
+## API Integration
 
-```bash
-npm run preview
-```
+The frontend communicates with the IslamicAI backend through the following endpoints:
 
-## Project Structure
+### Authentication
+- `POST /auth/signup` - Create new user account
+- `POST /auth/login` - Authenticate existing user
+- `POST /auth/google` - Google Sign-In
 
-```
-src/
-├── components/     # React components
-├── hooks/          # Custom hooks
-├── lib/            # Utility functions
-├── pages/          # Page components
-├── App.tsx         # Main App component
-├── main.tsx        # Entry point
-└── index.css       # Global styles
-```
+### User Preferences
+- `POST /prefs/update` - Update user preferences
+- `POST /prefs/clear` - Clear specific preference
+- `GET /memory/profile` - Get user profile and preferences
+- `POST /memory/clear` - Clear all user memories
 
-## Configuration
-
-The frontend connects to the IslamicAI backend at `https://islamicai.sohal70760.workers.dev`. You can modify this URL in the `src/pages/Index.tsx` file.
-
-## Deployment
-
-This project is configured for deployment to Cloudflare Pages. Make sure to use npm for building the project to avoid lockfile conflicts.
+### Chat
+- `POST /` - Send message and get response
+- `GET /health` - Check backend health
 
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch
+2. Create your feature branch
 3. Commit your changes
 4. Push to the branch
-5. Create a pull request
+5. Open a pull request
 
 ## License
 

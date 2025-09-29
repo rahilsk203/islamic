@@ -2,23 +2,27 @@ import { useEffect, useRef, useState } from 'react';
 import { SendIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { useMobileKeyboard, useIsMobile } from '@/hooks';
+import { useMobileKeyboard } from '@/hooks';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
   value?: string;
   onChangeValue?: (value: string) => void;
   autoFocus?: boolean;
-  isSidebarOpen?: boolean;
 }
 
-const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus, isSidebarOpen }: ChatInputProps) => {
+const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInputProps) => {
   const [message, setMessage] = useState('');
   const { isKeyboardOpen, initialViewportHeight } = useMobileKeyboard();
-  const isMobile = useIsMobile();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const wasKeyboardOpenRef = useRef(false);
+
+  // Check if device is mobile
+  const isMobile = () => {
+    if (typeof window === 'undefined') return false;
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
 
   const autoresizeTextarea = () => {
     const el = textareaRef.current;
@@ -28,9 +32,9 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus, isSidebarOp
     el.style.height = 'auto';
     
     // Calculate max height based on viewport - only apply mobile-specific limits on mobile
-    const maxHeight = isMobile && isKeyboardOpen 
+    const maxHeight = isMobile() && isKeyboardOpen 
       ? Math.min(150, window.innerHeight * 0.3) 
-      : isMobile
+      : isMobile()
       ? Math.min(150, window.innerHeight * 0.2)
       : 150; // Fixed max height for desktop
     
@@ -53,12 +57,12 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus, isSidebarOp
 
   useEffect(() => {
     autoresizeTextarea();
-  }, [message, isKeyboardOpen, isMobile]);
+  }, [message, isKeyboardOpen]);
 
   // Additional effect to handle mobile keyboard changes
   useEffect(() => {
     // Only apply on mobile devices
-    if (!isMobile) return;
+    if (!isMobile()) return;
     
     // Detect keyboard state changes
     if (wasKeyboardOpenRef.current !== isKeyboardOpen) {
@@ -82,7 +86,7 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus, isSidebarOp
         }, 100);
       }
     }
-  }, [isKeyboardOpen, isMobile]);
+  }, [isKeyboardOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,30 +103,14 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus, isSidebarOp
     }
   };
 
-  // Determine the appropriate z-index based on sidebar state and keyboard visibility
-  const getInputContainerClasses = () => {
-    let classes = "border-t border-border bg-chat-bg transition-all duration-300 ";
-    
-    if (isMobile && isKeyboardOpen) {
-      classes += "fixed inset-x-0 bottom-0 pb-2 safe-bottom-padding keyboard-visible ";
-      
-      // When sidebar is open and keyboard is visible, adjust z-index to prevent overlap
-      if (isSidebarOpen) {
-        classes += "z-60 "; // Higher than sidebar z-50
-      } else {
-        classes += "z-50 ";
-      }
-    }
-    
-    return classes;
-  };
-
   return (
     <div 
       ref={containerRef}
-      className={getInputContainerClasses()}
+      className={`border-t border-border bg-chat-bg transition-all duration-300 ${
+        isMobile() && isKeyboardOpen ? 'fixed inset-x-0 bottom-0 pb-2 safe-bottom-padding keyboard-visible' : ''
+      }`}
     >
-      <div className={`max-w-4xl mx-auto p-4 ${isMobile && isKeyboardOpen ? 'pb-2' : ''}`}>
+      <div className={`max-w-4xl mx-auto p-4 ${isMobile() && isKeyboardOpen ? 'pb-2' : ''}`}>
         <form onSubmit={handleSubmit} className="relative">
           <div className="flex items-end gap-3 bg-white border border-gray-300 rounded-2xl p-1 shadow-sm focus-within:ring-2 focus-within:ring-green-500 focus-within:border-green-500 transition-all">
             <Textarea

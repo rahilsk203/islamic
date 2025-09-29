@@ -6,6 +6,7 @@ import ChatMessage from '@/components/ChatMessage';
 import ChatInput from '@/components/ChatInput';
 import TypingIndicator from '@/components/TypingIndicator';
 import { useMobileKeyboard } from '@/hooks';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Message {
   id: number;
@@ -42,7 +43,9 @@ const Index = () => {
   const activeAbortRef = useRef<AbortController | null>(null);
 
   // Configuration - Update this to match your backend URL
-  const BACKEND_URL = 'https://islamicai.sohal70760.workers.dev';
+  const BACKEND_URL = 'http://127.0.0.1:8787';
+  
+  const { token } = useAuth();
 
   // Track whether user is near bottom to avoid forced scroll during read
   const isUserNearBottomRef = useRef(true);
@@ -233,13 +236,20 @@ const Index = () => {
         requestBody.manual_ip = manualIP;
       }
       
+      // Add user token if authenticated
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const controller = new AbortController();
       activeAbortRef.current = controller;
       const response = await fetch(`${BACKEND_URL}/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(requestBody),
         signal: controller.signal
       });
@@ -384,7 +394,7 @@ const Index = () => {
       setShowTyping(false);
       activeAbortRef.current = null;
     }
-  }, [isSending, manualIP, sessionId, locationInfo]);
+  }, [isSending, manualIP, sessionId, locationInfo, token]);
 
   const toggleSidebar = useCallback(() => {
     setIsSidebarOpen(prev => !prev);
@@ -434,7 +444,7 @@ const Index = () => {
       />
       
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        <ChatHeader onToggleSidebar={toggleSidebar} onNewChat={newSession} />
+        <ChatHeader onToggleSidebar={toggleSidebar} onNewChat={newSession} backendUrl={BACKEND_URL} />
         
         {/* Messages Container with Fixed Scrolling */}
         <div 
@@ -527,7 +537,6 @@ const Index = () => {
               }
             }}
             autoFocus={!!editing}
-            isSidebarOpen={isSidebarOpen} // Pass the sidebar state
           />
         </div>
       </div>

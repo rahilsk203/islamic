@@ -8,10 +8,6 @@
     @apply bg-blue-100 text-gray-900 rounded-2xl rounded-tr-none px-4 py-3 text-right max-w-full break-words;
   }
   
-  .message-user-editing {
-    @apply bg-blue-50 border-2 border-blue-300 rounded-2xl px-4 py-3;
-  }
-  
   .message-bot {
     @apply text-left break-words;
   }
@@ -206,6 +202,19 @@
     .mobile-transition {
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
+  }
+  
+  /* Enhanced mobile input handling */
+  @media screen and (max-width: 768px) {
+    /* Prevent input zoom on iOS */
+    input, textarea, select {
+      font-size: 16px;
+    }
+    
+    /* Better handling for virtual keyboard */
+    .mobile-input-container {
+      transition: all 0.3s ease;
+    }
     
     /* Ensure input is visible when keyboard is open */
     .keyboard-visible {
@@ -213,17 +222,13 @@
       bottom: 0;
       left: 0;
       right: 0;
+      z-index: 50;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     /* Handle keyboard hiding smoothly */
     .keyboard-hiding {
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    /* Custom z-index classes for mobile */
-    .z-60 {
-      z-index: 60;
     }
   }
   
@@ -276,10 +281,5 @@
       position: relative;
       width: 100%;
     }
-  }
-  
-  /* Custom z-index classes for desktop (fallback) */
-  .z-60 {
-    z-index: 60;
   }
 }

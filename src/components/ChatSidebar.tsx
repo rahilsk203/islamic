@@ -9,13 +9,16 @@ import {
   SettingsIcon,
   HelpCircleIcon,
   LogOutIcon,
+  LogInIcon,
   ChevronRightIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { readSessionsIndex } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?: boolean; onClose?: () => void; onNewChat?: () => void; onSelectSession?: (id: string) => void }) => {
+  const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [sessions, setSessions] = useState(readSessionsIndex());
   const deferredQuery = useDeferredValue(searchQuery);
@@ -172,13 +175,46 @@ const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?:
                 <HelpCircleIcon className="w-5 h-5" />
                 Help & FAQ
               </Button>
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start gap-3 h-12 hover:bg-gray-100 text-sidebar-text rounded-xl"
-              >
-                <LogOutIcon className="w-5 h-5" />
-                Sign Out
-              </Button>
+              
+              {user ? (
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start gap-3 h-12 hover:bg-gray-100 text-sidebar-text rounded-xl"
+                  onClick={logout}
+                >
+                  <LogOutIcon className="w-5 h-5" />
+                  Sign Out
+                </Button>
+              ) : (
+                <>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start gap-3 h-12 hover:bg-gray-100 text-sidebar-text rounded-xl"
+                    onClick={() => {
+                      // This would typically open a login modal
+                      // For now, we'll just close the sidebar
+                      onClose?.();
+                      // You might want to trigger the login modal here
+                    }}
+                  >
+                    <LogInIcon className="w-5 h-5" />
+                    Login
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start gap-3 h-12 hover:bg-gray-100 text-sidebar-text rounded-xl"
+                    onClick={() => {
+                      // This would typically open a signup modal
+                      // For now, we'll just close the sidebar
+                      onClose?.();
+                      // You might want to trigger the signup modal here
+                    }}
+                  >
+                    <UserIcon className="w-5 h-5" />
+                    Sign Up
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
