@@ -38,6 +38,14 @@ export function AuthProvider({ children, backendUrl }: { children: ReactNode; ba
     if (savedToken && savedUser) {
       setToken(savedToken);
       setUser(JSON.parse(savedUser));
+    } else {
+      // Provide a default user for testing without authentication
+      setUser({
+        id: 'test-user-id',
+        email: 'test@example.com',
+        name: 'Test User'
+      });
+      setToken('test-token');
     }
     
     if (savedCSRFToken) {
@@ -247,6 +255,13 @@ export function AuthProvider({ children, backendUrl }: { children: ReactNode; ba
     localStorage.removeItem('islamicai_token');
     localStorage.removeItem('islamicai_user');
     localStorage.removeItem('islamicai_csrf_token');
+    // Provide a default user after logout for testing
+    setUser({
+      id: 'test-user-id',
+      email: 'test@example.com',
+      name: 'Test User'
+    });
+    setToken('test-token');
   };
 
   return (

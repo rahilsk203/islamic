@@ -44,7 +44,7 @@ const Index = () => {
 
   // Configuration - Update this to match your backend URL
   const BACKEND_URL = 'https://islamicai.sohal70760.workers.dev';
-  
+  // const BACKEND_URL = 'http://127.0.0.1:8787';
   const { token } = useAuth();
 
   // Track whether user is near bottom to avoid forced scroll during read
@@ -241,7 +241,9 @@ const Index = () => {
         'Content-Type': 'application/json',
       };
       
-      if (token) {
+      // Always send requests, even without authentication
+      // Only add Authorization header if we have a real token (not the test token)
+      if (token && token !== 'test-token') {
         headers['Authorization'] = `Bearer ${token}`;
       }
       

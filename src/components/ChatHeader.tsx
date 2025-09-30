@@ -37,6 +37,7 @@ const ChatHeaderBase = ({ onToggleSidebar, onNewChat, backendUrl }: { onToggleSi
         </div>
         
         <div className="flex items-center gap-2">
+          {/* Hide user profile section when there's no user */}
           {user ? (
             <Button 
               variant="ghost" 
@@ -46,55 +47,37 @@ const ChatHeaderBase = ({ onToggleSidebar, onNewChat, backendUrl }: { onToggleSi
             >
               <UserIcon className="w-5 h-5" />
             </Button>
-          ) : (
-            <Button 
-              variant="ghost" 
-              className="gap-2 text-muted-foreground hover:text-foreground hover:bg-gray-100 rounded-full px-3 py-2"
-              onClick={() => {
-                setAuthMode('login');
-                setAuthModalOpen(true);
-              }}
-            >
-              <UserIcon className="w-5 h-5" />
-              <span>Login</span>
-            </Button>
-          )}
+          ) : null}
           
           <Button 
             variant="ghost" 
-            className="gap-2 text-muted-foreground hover:text-foreground hover:bg-gray-100 rounded-full px-3 py-2 hidden sm:flex"
+            className="gap-2 text-muted-foreground hover:text-foreground hover:bg-gray-100 rounded-full px-3 py-2"
             onClick={onNewChat}
           >
             <PlusIcon className="w-5 h-5" />
             <span>New Chat</span>
           </Button>
-          
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="text-muted-foreground hover:text-foreground hover:bg-gray-100 rounded-full p-2 sm:hidden"
-            onClick={onNewChat}
-          >
-            <PlusIcon className="w-5 h-5" />
-          </Button>
         </div>
       </header>
       
-      <AuthModal 
-        open={authModalOpen} 
-        onOpenChange={(open) => {
-          setAuthModalOpen(open);
-          // Reset to login mode when closing
-          if (!open) {
-            setAuthMode('login');
-          }
-        }} 
-        mode={authMode}
-        backendUrl={backendUrl}
-      />
+      {/* Only show auth modal if user is not authenticated */}
+      {user ? null : (
+        <AuthModal 
+          open={authModalOpen} 
+          onOpenChange={(open) => {
+            setAuthModalOpen(open);
+            // Reset to login mode when closing
+            if (!open) {
+              setAuthMode('login');
+            }
+          }} 
+          mode={authMode}
+          backendUrl={backendUrl}
+        />
+      )}
       
-      {user && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" style={{ display: profileOpen ? 'flex' : 'none' }}>
+      {user && profileOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
           <div className="relative">
             <Button 
               variant="ghost" 
