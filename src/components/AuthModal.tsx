@@ -130,20 +130,20 @@ export function AuthModal({ open, onOpenChange, mode, backendUrl }: AuthModalPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] w-full max-w-md mx-4">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center">
+      <DialogContent className="sm:max-w-[350px] w-full max-w-md mx-2 p-4">
+        <DialogHeader className="mb-2">
+          <DialogTitle className="text-xl font-bold text-center">
             {currentMode === 'login' ? 'Welcome Back' : 'Create Account'}
           </DialogTitle>
-          <p className="text-center text-muted-foreground text-sm">
+          <p className="text-center text-muted-foreground text-xs">
             {currentMode === 'login' 
               ? 'Sign in to your IslamicAI account' 
               : 'Join IslamicAI to personalize your experience'}
           </p>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
+            <Label htmlFor="email" className="text-xs font-medium">Email Address</Label>
             <Input
               id="email"
               type="email"
@@ -151,11 +151,11 @@ export function AuthModal({ open, onOpenChange, mode, backendUrl }: AuthModalPro
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="h-12"
+              className="h-10 text-sm"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+            <Label htmlFor="password" className="text-xs font-medium">Password</Label>
             <Input
               id="password"
               type="password"
@@ -163,12 +163,12 @@ export function AuthModal({ open, onOpenChange, mode, backendUrl }: AuthModalPro
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="h-12"
+              className="h-10 text-sm"
             />
           </div>
           {currentMode === 'signup' && (
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
+              <Label htmlFor="confirmPassword" className="text-xs font-medium">Confirm Password</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -176,20 +176,20 @@ export function AuthModal({ open, onOpenChange, mode, backendUrl }: AuthModalPro
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="h-12"
+                className="h-10 text-sm"
               />
             </div>
           )}
           {(error || localError) && (
-            <div className="text-red-500 text-sm bg-red-50 p-3 rounded-md">
+            <div className="text-red-500 text-xs bg-red-50 p-2 rounded-md">
               {error || localError}
             </div>
           )}
-          <div className="flex flex-col gap-3 pt-2">
-            <Button type="submit" disabled={loading} className="h-12 text-base">
+          <div className="flex flex-col gap-2 pt-1">
+            <Button type="submit" disabled={loading} className="h-10 text-sm">
               {loading ? (
                 <span className="flex items-center">
-                  <span className="animate-spin mr-2">●</span>
+                  <span className="animate-spin mr-2 text-xs">●</span>
                   {currentMode === 'login' ? 'Signing In...' : 'Creating Account...'}
                 </span>
               ) : currentMode === 'login' ? 'Sign In' : 'Create Account'}
@@ -212,17 +212,17 @@ export function AuthModal({ open, onOpenChange, mode, backendUrl }: AuthModalPro
               variant="outline"
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="h-12 text-base"
+              className="h-10 text-sm"
             >
               {loading ? 'Loading...' : 'Continue with Google'}
             </Button>
             
-            <div className="text-center text-sm pt-2">
+            <div className="text-center text-xs pt-1">
               <Button
                 type="button"
                 variant="link"
                 onClick={() => handleModeChange(currentMode === 'login' ? 'signup' : 'login')}
-                className="p-0 h-auto font-normal text-base"
+                className="p-0 h-auto font-normal text-sm"
               >
                 {currentMode === 'login' 
                   ? "Don't have an account? Sign Up" 

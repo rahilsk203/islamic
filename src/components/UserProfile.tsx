@@ -180,37 +180,35 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
   // For guest users, show a message instead of trying to load profile data
   if (!isAuthenticatedUser) {
     return (
-      <div className="w-full max-w-md mx-auto p-4 sm:p-6">
+      <div className="w-full max-w-md mx-auto p-2">
         <Card className="w-full">
-          <CardHeader className="text-center pb-4">
-            <div className="mx-auto bg-gray-100 rounded-full p-3 w-14 h-14 flex items-center justify-center mb-4">
-              <UserIcon className="w-7 h-7 text-gray-500" />
+          <CardHeader className="text-center pb-2 pt-3">
+            <div className="mx-auto bg-gray-100 rounded-full p-1.5 w-10 h-10 flex items-center justify-center mb-2">
+              <UserIcon className="w-5 h-5 text-gray-500" />
             </div>
-            <CardTitle className="text-xl">Guest Access</CardTitle>
-            <CardDescription className="mt-1">
-              Unlock personalized IslamicAI features
+            <CardTitle className="text-base">Guest Access</CardTitle>
+            <CardDescription className="mt-0.5 text-xs">
+              Unlock IslamicAI features
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-5">
-            <div className="text-center space-y-4">
-              <p className="text-muted-foreground text-sm">
-                Sign in to access your personalized preferences, conversation history, and other exclusive features.
+          <CardContent className="space-y-3 py-3 px-3">
+            <div className="text-center space-y-2">
+              <p className="text-muted-foreground text-xs">
+                Sign in for personalized features
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="bg-blue-50 p-3 rounded-lg">
-                  <h3 className="font-medium text-blue-800 text-sm">Guest Benefits</h3>
-                  <ul className="text-xs text-blue-700 mt-2 space-y-1">
-                    <li>• Ask questions about Islam</li>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-blue-50 p-1.5 rounded">
+                  <h3 className="font-medium text-blue-800 text-xs">Guest</h3>
+                  <ul className="text-xs text-blue-700 mt-1 space-y-0.5">
+                    <li>• Ask questions</li>
                     <li>• Get prayer times</li>
-                    <li>• Access Islamic knowledge</li>
                   </ul>
                 </div>
-                <div className="bg-green-50 p-3 rounded-lg">
-                  <h3 className="font-medium text-green-800 text-sm">Member Benefits</h3>
-                  <ul className="text-xs text-green-700 mt-2 space-y-1">
-                    <li>• Save conversation history</li>
-                    <li>• Personalize preferences</li>
-                    <li>• Get tailored recommendations</li>
+                <div className="bg-green-50 p-1.5 rounded">
+                  <h3 className="font-medium text-green-800 text-xs">Member</h3>
+                  <ul className="text-xs text-green-700 mt-1 space-y-0.5">
+                    <li>• Save history</li>
+                    <li>• Personalize</li>
                   </ul>
                 </div>
               </div>
@@ -221,10 +219,10 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
                 const event = new CustomEvent('openAuthModal', { detail: { mode: 'login' } });
                 window.dispatchEvent(event);
               }}
-              className="w-full h-11 text-base"
+              className="w-full h-8 text-xs"
             >
-              <LockIcon className="mr-2 h-4 w-4" />
-              Sign In / Create Account
+              <LockIcon className="mr-1 h-3 w-3" />
+              Sign In
             </Button>
           </CardContent>
         </Card>
@@ -234,15 +232,15 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
 
   if (loading) {
     return (
-      <div className="w-full max-w-2xl mx-auto p-4 sm:p-6">
+      <div className="w-full max-w-md mx-auto p-2">
         <Card className="w-full">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-xl">Loading Profile</CardTitle>
-            <CardDescription className="mt-1">Please wait while we load your information</CardDescription>
+          <CardHeader className="pb-2 pt-3">
+            <CardTitle className="text-base">Loading Profile</CardTitle>
+            <CardDescription className="mt-0.5 text-xs">Please wait</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center p-8">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-600"></div>
+          <CardContent className="py-4">
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
             </div>
           </CardContent>
         </Card>
@@ -251,109 +249,96 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-4 sm:p-6">
+    <div className="w-full max-w-md mx-auto p-2">
       <Card className="w-full">
-        <CardHeader className="pb-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <CardHeader className="pb-2 pt-3">
+          <div className="flex items-center justify-between gap-2">
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-xl">Your Profile</CardTitle>
-              <CardDescription className="mt-1">Manage your account settings and preferences</CardDescription>
+              <CardTitle className="text-base">Your Profile</CardTitle>
+              <CardDescription className="mt-0.5 text-xs">Manage settings</CardDescription>
             </div>
-            <div className="flex-shrink-0">
-              <Button 
-                variant="outline" 
-                onClick={logout}
-                className="h-10 px-4 w-full sm:w-auto"
-              >
-                <LogOutIcon className="mr-2 h-4 w-4" />
-                Sign Out
-              </Button>
-            </div>
+            <Button 
+              variant="outline" 
+              onClick={logout}
+              className="h-7 px-2 text-xs"
+            >
+              <LogOutIcon className="mr-1 h-3 w-3" />
+              Sign Out
+            </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="p-4 bg-muted rounded-lg">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-lg truncate">{user.name || user.email}</h3>
-                <p className="text-sm text-muted-foreground truncate">
-                  {user.email ? `Logged in${user.email.includes('google') ? ' with Google' : ''}` : 'Logged in'}
-                </p>
-                {profileData && (
-                  <p className="text-xs text-muted-foreground mt-1 truncate">
-                    Login count: {profileData.login_count || 0} | 
-                    Last login: {profileData.last_login ? new Date(profileData.last_login).toLocaleDateString() : 'N/A'}
-                  </p>
-                )}
-              </div>
-            </div>
+        <CardContent className="space-y-3 py-3 px-3">
+          <div className="p-2 bg-muted rounded">
+            <h3 className="font-medium text-sm truncate">{user.name || user.email}</h3>
+            <p className="text-xs text-muted-foreground truncate">
+              {user.email ? `Logged in${user.email.includes('google') ? ' with Google' : ''}` : 'Logged in'}
+            </p>
+            {profileData && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Logins: {profileData.login_count || 0}
+              </p>
+            )}
           </div>
           
           {memoryProfile && (
-            <div className="bg-muted p-4 rounded-lg">
-              <h4 className="font-medium mb-2">Memory Profile</h4>
-              <p className="text-sm">Total memories: {memoryProfile.memoryCount || 0}</p>
+            <div className="bg-muted p-2 rounded">
+              <h4 className="font-medium text-xs mb-1">Memory: {memoryProfile.memoryCount || 0} items</h4>
               {memoryProfile.recentSummaries && memoryProfile.recentSummaries.length > 0 && (
-                <div className="mt-2">
-                  <p className="text-sm font-medium">Recent discussions:</p>
-                  <ul className="text-xs list-disc pl-5 mt-1 space-y-1">
-                    {memoryProfile.recentSummaries.slice(0, 3).map((summary, index) => (
-                      <li key={index} className="break-words">{summary}</li>
-                    ))}
-                  </ul>
+                <div className="mt-1">
+                  <p className="text-xs">Recent:</p>
+                  <p className="text-xs truncate">{memoryProfile.recentSummaries[0]}</p>
                 </div>
               )}
             </div>
           )}
           
-          <div className="space-y-5">
-            <h3 className="text-lg font-medium border-b pb-2 mb-4">Preferences</h3>
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium border-b pb-1">Preferences</h3>
             
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="language">Preferred Language</Label>
+            <div className="space-y-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="language" className="text-xs">Language</Label>
                 <Select value={language} onValueChange={setLanguage}>
-                  <SelectTrigger className="h-11">
-                    <SelectValue placeholder="Select language" />
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Language" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="english">English</SelectItem>
-                    <SelectItem value="hindi">Hindi (हिंदी)</SelectItem>
-                    <SelectItem value="bengali">Bengali (বাংলা)</SelectItem>
-                    <SelectItem value="hinglish">Hinglish</SelectItem>
+                    <SelectItem value="english" className="text-xs">English</SelectItem>
+                    <SelectItem value="hindi" className="text-xs">Hindi</SelectItem>
+                    <SelectItem value="hinglish" className="text-xs">Hinglish</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="madhhab">Madhhab Preference</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="madhhab" className="text-xs">Madhhab</Label>
                 <Select value={madhhab} onValueChange={setMadhhab}>
-                  <SelectTrigger className="h-11">
-                    <SelectValue placeholder="Select madhhab" />
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Madhhab" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="hanafi">Hanafi</SelectItem>
-                    <SelectItem value="shafii">Shafi'i</SelectItem>
-                    <SelectItem value="maliki">Maliki</SelectItem>
-                    <SelectItem value="hanbali">Hanbali</SelectItem>
+                    <SelectItem value="hanafi" className="text-xs">Hanafi</SelectItem>
+                    <SelectItem value="shafii" className="text-xs">Shafi'i</SelectItem>
+                    <SelectItem value="maliki" className="text-xs">Maliki</SelectItem>
+                    <SelectItem value="hanbali" className="text-xs">Hanbali</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="interests">Interests (comma separated)</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="interests" className="text-xs">Interests</Label>
                 <Input
                   id="interests"
                   value={interests}
                   onChange={(e) => setInterests(e.target.value)}
-                  placeholder="e.g., Fiqh, Tafsir, Islamic history"
-                  className="h-11"
+                  placeholder="Fiqh, Tafsir, etc."
+                  className="h-8 text-xs"
                 />
               </div>
             </div>
             
             {message && (
-              <div className={`p-3 rounded-md text-sm ${
+              <div className={`p-2 rounded text-xs ${
                 message.includes('Failed') 
                   ? 'bg-red-50 text-red-700' 
                   : 'bg-green-50 text-green-700'
@@ -362,25 +347,20 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
               </div>
             )}
             
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <div className="flex gap-2">
               <Button 
                 onClick={handleSavePreferences} 
                 disabled={saving}
-                className="flex-1 h-11"
+                className="flex-1 h-8 text-xs"
               >
-                {saving ? (
-                  <span className="flex items-center">
-                    <span className="animate-spin mr-2">●</span>
-                    Saving...
-                  </span>
-                ) : 'Save Preferences'}
+                {saving ? 'Saving...' : 'Save'}
               </Button>
               <Button 
                 variant="outline" 
                 onClick={handleClearMemory}
-                className="flex-1 h-11"
+                className="flex-1 h-8 text-xs"
               >
-                Clear Memory
+                Clear
               </Button>
             </div>
           </div>
