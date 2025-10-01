@@ -43,24 +43,16 @@ Route guard for authenticated users:
 - Redirects unauthenticated users to login page
 - Wraps protected routes
 
-### 5. Login Page (`src/pages/Login.tsx`)
-
-Dedicated authentication page:
-- Toggle between login and signup
-- Form validation
-- Error handling
-
 ## Integration Points
 
 ### 1. App Component (`src/App.tsx`)
 
 - Wrapped application with AuthProvider
-- Added login route
 - Configured backend URL
 
 ### 2. Chat Header (`src/components/ChatHeader.tsx`)
 
-- Added authentication UI (login button/user profile)
+- Added authentication UI (login/signup buttons/user profile)
 - Integrated AuthModal and UserProfile components
 - Passed backend URL to components
 

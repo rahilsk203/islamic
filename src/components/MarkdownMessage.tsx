@@ -101,7 +101,7 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ text }) => {
     .map((part, idx) => renderBlock(part, idx % 2 === 1))
     .join('');
   return (
-    <div className="max-w-none space-y-2">
+    <div className="max-w-none space-y-2 break-words">
       <div dangerouslySetInnerHTML={{ __html: html }} />
     </div>
   );

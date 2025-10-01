@@ -101,7 +101,7 @@ const ChatMessageBase = ({ message, isUser = false, onRegenerate, onEditUser, on
         </div>
         
         {/* Message Content */}
-        <div className={isUser ? 'flex-shrink' : 'flex-1'}>
+        <div className={`${isUser ? 'flex-shrink' : 'flex-1'} w-full`}>
           {isEditing && isUser ? (
             // Edit mode for user messages
             <div className="message-user inline-block w-full max-w-full">
@@ -144,7 +144,7 @@ const ChatMessageBase = ({ message, isUser = false, onRegenerate, onEditUser, on
             </div>
           ) : (
             // Display mode for bot messages
-            <div className="max-w-full">
+            <div className="max-w-full w-full">
               <MarkdownMessage text={message} />
             </div>
           )}

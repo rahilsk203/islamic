@@ -272,6 +272,18 @@
       margin-left: 0.25rem;
       margin-right: 0.25rem;
     }
+    
+    /* Adjust message container for better mobile experience */
+    .message-container {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+    
+    /* Adjust input container for better mobile experience */
+    .input-container {
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
   }
   
   /* Desktop-specific styles */
@@ -280,6 +292,31 @@
     .desktop-input {
       position: relative;
       width: 100%;
+    }
+  }
+  
+  /* Improved responsive breakpoints */
+  @media (max-width: 640px) {
+    .sm\:px-4 {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    
+    .sm\:text-sm {
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+    }
+  }
+  
+  /* Better handling for very small screens */
+  @media (max-width: 480px) {
+    .xs\:p-2 {
+      padding: 0.5rem;
+    }
+    
+    .xs\:text-xs {
+      font-size: 0.75rem;
+      line-height: 1rem;
     }
   }
 }

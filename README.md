@@ -47,7 +47,6 @@ For Google Sign-In, you need to:
 1. Create a Google OAuth client ID in the Google Cloud Console
 2. Update the client ID in:
    - `src/components/AuthModal.tsx`
-   - `src/pages/Login.tsx`
 
 ## Authentication
 

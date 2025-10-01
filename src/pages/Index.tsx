@@ -43,9 +43,9 @@ const Index = () => {
   const activeAbortRef = useRef<AbortController | null>(null);
 
   // Configuration - Update this to match your backend URL
-  const BACKEND_URL = 'https://islamicai.sohal70760.workers.dev';
-  // const BACKEND_URL = 'http://127.0.0.1:8787';
-  const { token } = useAuth();
+  // const BACKEND_URL = 'https://islamicai.sohal70760.workers.dev';
+  const BACKEND_URL = 'http://127.0.0.1:8787';
+  const { token, isGuest } = useAuth();
 
   // Track whether user is near bottom to avoid forced scroll during read
   const isUserNearBottomRef = useRef(true);
@@ -241,9 +241,11 @@ const Index = () => {
         'Content-Type': 'application/json',
       };
       
-      // Always send requests, even without authentication
+      // Check if user is a real authenticated user (not a guest)
+      const isAuthenticatedUser = token && token !== 'test-token' && !isGuest;
+      
       // Only add Authorization header if we have a real token (not the test token)
-      if (token && token !== 'test-token') {
+      if (isAuthenticatedUser) {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
@@ -396,7 +398,7 @@ const Index = () => {
       setShowTyping(false);
       activeAbortRef.current = null;
     }
-  }, [isSending, manualIP, sessionId, locationInfo, token]);
+  }, [isSending, manualIP, sessionId, locationInfo, token, isGuest]);
 
   const toggleSidebar = useCallback(() => {
     setIsSidebarOpen(prev => !prev);

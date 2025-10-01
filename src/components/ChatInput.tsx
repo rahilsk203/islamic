@@ -139,7 +139,7 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
         </form>
         
         {!isKeyboardOpen && (
-          <div className="text-xs text-center text-muted-foreground mt-3">
+          <div className="text-xs text-center text-muted-foreground mt-3 px-2">
             IslamicAI can make mistakes. Verify important information.{' '}
             <button className="underline hover:no-underline">
               See Usage Guidelines

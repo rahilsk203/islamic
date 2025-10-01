@@ -18,6 +18,7 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   getCSRFToken: (backendUrl: string) => Promise<string | null>;
+  isGuest: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,6 +29,7 @@ export function AuthProvider({ children, backendUrl }: { children: ReactNode; ba
   const [csrfToken, setCSRFToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isGuest, setIsGuest] = useState(true);
 
   // Check for existing token on app start
   useEffect(() => {
@@ -38,6 +40,7 @@ export function AuthProvider({ children, backendUrl }: { children: ReactNode; ba
     if (savedToken && savedUser) {
       setToken(savedToken);
       setUser(JSON.parse(savedUser));
+      setIsGuest(false);
     } else {
       // Provide a default user for testing without authentication
       setUser({
@@ -46,6 +49,7 @@ export function AuthProvider({ children, backendUrl }: { children: ReactNode; ba
         name: 'Test User'
       });
       setToken('test-token');
+      setIsGuest(true);
     }
     
     if (savedCSRFToken) {
@@ -130,6 +134,7 @@ export function AuthProvider({ children, backendUrl }: { children: ReactNode; ba
       
       setUser(userProfile);
       setToken(token);
+      setIsGuest(false);
       
       // Save to localStorage
       localStorage.setItem('islamicai_token', token);
@@ -174,6 +179,7 @@ export function AuthProvider({ children, backendUrl }: { children: ReactNode; ba
       const userProfile: User = { id: user_id, email };
       setUser(userProfile);
       setToken(token);
+      setIsGuest(false);
       
       // Save to localStorage
       localStorage.setItem('islamicai_token', token);
@@ -236,6 +242,7 @@ export function AuthProvider({ children, backendUrl }: { children: ReactNode; ba
       
       setUser(userProfile);
       setToken(token);
+      setIsGuest(false);
       
       // Save to localStorage
       localStorage.setItem('islamicai_token', token);
@@ -252,6 +259,7 @@ export function AuthProvider({ children, backendUrl }: { children: ReactNode; ba
     setUser(null);
     setToken(null);
     setCSRFToken(null);
+    setIsGuest(true);
     localStorage.removeItem('islamicai_token');
     localStorage.removeItem('islamicai_user');
     localStorage.removeItem('islamicai_csrf_token');
@@ -265,7 +273,7 @@ export function AuthProvider({ children, backendUrl }: { children: ReactNode; ba
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, csrfToken, login, signup, loginWithGoogle, logout, loading, error, getCSRFToken }}>
+    <AuthContext.Provider value={{ user, token, csrfToken, login, signup, loginWithGoogle, logout, loading, error, getCSRFToken, isGuest }}>
       {children}
     </AuthContext.Provider>
   );

@@ -9,7 +9,6 @@ import {
   SettingsIcon,
   HelpCircleIcon,
   LogOutIcon,
-  LogInIcon,
   ChevronRightIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,7 @@ import { readSessionsIndex } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
 const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?: boolean; onClose?: () => void; onNewChat?: () => void; onSelectSession?: (id: string) => void }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, token, isGuest } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [sessions, setSessions] = useState(readSessionsIndex());
   const deferredQuery = useDeferredValue(searchQuery);
@@ -48,6 +47,9 @@ const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?:
     'Character Development'
   ];
 
+  // Check if user is a real authenticated user (not a guest)
+  const isAuthenticatedUser = user && token && token !== 'test-token' && !isGuest;
+
   return (
     <>
       {/* Mobile overlay */}
@@ -70,9 +72,12 @@ const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?:
           <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
             <BookOpenIcon className="w-7 h-7 text-white" />
           </div>
-          <div>
+          <div className="hidden sm:block">
             <h2 className="text-xl font-bold text-foreground">IslamicAI</h2>
             <p className="text-sm text-sidebar-text-muted">Scholar Assistant</p>
+          </div>
+          <div className="block sm:hidden">
+            <h2 className="text-lg font-bold text-foreground">IslamicAI</h2>
           </div>
         </div>
 
@@ -87,7 +92,7 @@ const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?:
             >
               <div className="flex items-center gap-2">
                 <PlusIcon className="w-5 h-5" />
-                New Chat
+                <span className="hidden sm:inline">New Chat</span>
               </div>
               <ChevronRightIcon className="w-5 h-5" />
             </Button>
@@ -122,7 +127,7 @@ const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?:
                     <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
                       <item.icon className="w-5 h-5 text-green-600" />
                     </div>
-                    {item.label}
+                    <span className="hidden sm:inline">{item.label}</span>
                   </div>
                   <ChevronRightIcon className="w-5 h-5 text-sidebar-text-muted" />
                 </Button>
@@ -166,54 +171,26 @@ const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?:
                 className="w-full justify-start gap-3 h-12 hover:bg-gray-100 text-sidebar-text rounded-xl"
               >
                 <SettingsIcon className="w-5 h-5" />
-                Settings
+                <span className="hidden sm:inline">Settings</span>
               </Button>
               <Button 
                 variant="ghost" 
                 className="w-full justify-start gap-3 h-12 hover:bg-gray-100 text-sidebar-text rounded-xl"
               >
                 <HelpCircleIcon className="w-5 h-5" />
-                Help & FAQ
+                <span className="hidden sm:inline">Help & FAQ</span>
               </Button>
               
-              {user ? (
+              {/* Show Sign Out button only for authenticated users */}
+              {isAuthenticatedUser && (
                 <Button 
                   variant="ghost" 
                   className="w-full justify-start gap-3 h-12 hover:bg-gray-100 text-sidebar-text rounded-xl"
                   onClick={logout}
                 >
                   <LogOutIcon className="w-5 h-5" />
-                  Sign Out
+                  <span className="hidden sm:inline">Sign Out</span>
                 </Button>
-              ) : (
-                <>
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start gap-3 h-12 hover:bg-gray-100 text-sidebar-text rounded-xl"
-                    onClick={() => {
-                      // This would typically open a login modal
-                      // For now, we'll just close the sidebar
-                      onClose?.();
-                      // You might want to trigger the login modal here
-                    }}
-                  >
-                    <LogInIcon className="w-5 h-5" />
-                    Login
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start gap-3 h-12 hover:bg-gray-100 text-sidebar-text rounded-xl"
-                    onClick={() => {
-                      // This would typically open a signup modal
-                      // For now, we'll just close the sidebar
-                      onClose?.();
-                      // You might want to trigger the signup modal here
-                    }}
-                  >
-                    <UserIcon className="w-5 h-5" />
-                    Sign Up
-                  </Button>
-                </>
               )}
             </div>
           </div>
