@@ -125,6 +125,11 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
       setMessage('Preferences saved successfully!');
       // Refresh profile data after saving
       fetchUserProfile();
+      
+      // Dispatch a custom event to notify other components that user preferences have been updated
+      window.dispatchEvent(new CustomEvent('userPreferencesUpdated', { 
+        detail: { language: language || null }
+      }));
     } catch (err) {
       setMessage('Failed to save preferences');
     } finally {
@@ -180,11 +185,11 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
   // For guest users, show a message instead of trying to load profile data
   if (!isAuthenticatedUser) {
     return (
-      <div className="w-full max-w-md mx-auto p-2">
-        <Card className="w-full">
+      <div className="w-full max-w-md mx-auto p-1">
+        <Card className="w-full border border-green-200 shadow-sm">
           <CardHeader className="text-center pb-2 pt-3">
-            <div className="mx-auto bg-gray-100 rounded-full p-1.5 w-10 h-10 flex items-center justify-center mb-2">
-              <UserIcon className="w-5 h-5 text-gray-500" />
+            <div className="mx-auto bg-green-100 rounded-full p-1.5 w-10 h-10 flex items-center justify-center mb-2">
+              <UserIcon className="w-5 h-5 text-green-600" />
             </div>
             <CardTitle className="text-base">Guest Access</CardTitle>
             <CardDescription className="mt-0.5 text-xs">
@@ -209,6 +214,7 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
                   <ul className="text-xs text-green-700 mt-1 space-y-0.5">
                     <li>• Save history</li>
                     <li>• Personalize</li>
+                    <li>• Memory features</li>
                   </ul>
                 </div>
               </div>
@@ -219,7 +225,7 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
                 const event = new CustomEvent('openAuthModal', { detail: { mode: 'login' } });
                 window.dispatchEvent(event);
               }}
-              className="w-full h-8 text-xs"
+              className="w-full h-8 text-xs bg-green-600 hover:bg-green-700"
             >
               <LockIcon className="mr-1 h-3 w-3" />
               Sign In
@@ -232,8 +238,8 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
 
   if (loading) {
     return (
-      <div className="w-full max-w-md mx-auto p-2">
-        <Card className="w-full">
+      <div className="w-full max-w-md mx-auto p-1">
+        <Card className="w-full border border-green-200">
           <CardHeader className="pb-2 pt-3">
             <CardTitle className="text-base">Loading Profile</CardTitle>
             <CardDescription className="mt-0.5 text-xs">Please wait</CardDescription>
@@ -249,18 +255,18 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto p-2">
-      <Card className="w-full">
+    <div className="w-full max-w-md mx-auto p-1">
+      <Card className="w-full border border-green-200 shadow-sm">
         <CardHeader className="pb-2 pt-3">
           <div className="flex items-center justify-between gap-2">
             <div className="flex-1 min-w-0">
               <CardTitle className="text-base">Your Profile</CardTitle>
-              <CardDescription className="mt-0.5 text-xs">Manage settings</CardDescription>
+              <CardDescription className="mt-0.5 text-xs">Manage your settings</CardDescription>
             </div>
             <Button 
               variant="outline" 
               onClick={logout}
-              className="h-7 px-2 text-xs"
+              className="h-8 px-2 text-xs border-green-300 text-green-700 hover:bg-green-50"
             >
               <LogOutIcon className="mr-1 h-3 w-3" />
               Sign Out
@@ -268,39 +274,49 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
           </div>
         </CardHeader>
         <CardContent className="space-y-3 py-3 px-3">
-          <div className="p-2 bg-muted rounded">
-            <h3 className="font-medium text-sm truncate">{user.name || user.email}</h3>
-            <p className="text-xs text-muted-foreground truncate">
-              {user.email ? `Logged in${user.email.includes('google') ? ' with Google' : ''}` : 'Logged in'}
-            </p>
+          <div className="p-2 bg-green-50 rounded-lg border border-green-100">
+            <div className="flex items-center gap-2">
+              <div className="bg-green-200 rounded-full p-1.5 w-10 h-10 flex items-center justify-center">
+                <UserIcon className="w-5 h-5 text-green-700" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-sm truncate">{user.name || user.email}</h3>
+                <p className="text-xs text-green-700 truncate">
+                  {user.email ? `Logged in${user.email.includes('google') ? ' with Google' : ''}` : 'Logged in'}
+                </p>
+              </div>
+            </div>
             {profileData && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Logins: {profileData.login_count || 0}
+              <p className="text-xs text-green-700 mt-1">
+                Total logins: {profileData.login_count || 0}
               </p>
             )}
           </div>
           
           {memoryProfile && (
-            <div className="bg-muted p-2 rounded">
-              <h4 className="font-medium text-xs mb-1">Memory: {memoryProfile.memoryCount || 0} items</h4>
+            <div className="bg-blue-50 p-2 rounded-lg border border-blue-100">
+              <h4 className="font-medium text-xs mb-1 flex items-center">
+                <span className="w-2 h-2 bg-blue-500 rounded-full mr-1"></span>
+                Memory: {memoryProfile.memoryCount || 0} items
+              </h4>
               {memoryProfile.recentSummaries && memoryProfile.recentSummaries.length > 0 && (
                 <div className="mt-1">
-                  <p className="text-xs">Recent:</p>
-                  <p className="text-xs truncate">{memoryProfile.recentSummaries[0]}</p>
+                  <p className="text-xs text-blue-700 mb-0.5">Recent:</p>
+                  <p className="text-xs text-blue-800 truncate">{memoryProfile.recentSummaries[0]}</p>
                 </div>
               )}
             </div>
           )}
           
           <div className="space-y-3">
-            <h3 className="text-sm font-medium border-b pb-1">Preferences</h3>
+            <h3 className="text-sm font-medium border-b border-green-200 pb-1">Preferences</h3>
             
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="space-y-1.5">
-                <Label htmlFor="language" className="text-xs">Language</Label>
+                <Label htmlFor="language" className="text-xs font-medium">Language</Label>
                 <Select value={language} onValueChange={setLanguage}>
                   <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="Language" />
+                    <SelectValue placeholder="Select language" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="english" className="text-xs">English</SelectItem>
@@ -311,10 +327,10 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
               </div>
               
               <div className="space-y-1.5">
-                <Label htmlFor="madhhab" className="text-xs">Madhhab</Label>
+                <Label htmlFor="madhhab" className="text-xs font-medium">Madhhab</Label>
                 <Select value={madhhab} onValueChange={setMadhhab}>
                   <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="Madhhab" />
+                    <SelectValue placeholder="Select madhhab" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="hanafi" className="text-xs">Hanafi</SelectItem>
@@ -326,41 +342,47 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
               </div>
               
               <div className="space-y-1.5">
-                <Label htmlFor="interests" className="text-xs">Interests</Label>
+                <Label htmlFor="interests" className="text-xs font-medium">Interests</Label>
                 <Input
                   id="interests"
                   value={interests}
                   onChange={(e) => setInterests(e.target.value)}
-                  placeholder="Fiqh, Tafsir, etc."
+                  placeholder="e.g., Fiqh, Tafsir, Hadith"
                   className="h-8 text-xs"
                 />
+                <p className="text-xs text-muted-foreground">Separate multiple interests with commas</p>
               </div>
             </div>
             
             {message && (
-              <div className={`p-2 rounded text-xs ${
+              <div className={`p-2 rounded-lg text-xs ${
                 message.includes('Failed') 
-                  ? 'bg-red-50 text-red-700' 
-                  : 'bg-green-50 text-green-700'
+                  ? 'bg-red-50 text-red-700 border border-red-200' 
+                  : 'bg-green-50 text-green-700 border border-green-200'
               }`}>
                 {message}
               </div>
             )}
             
-            <div className="flex gap-2">
+            <div className="flex gap-2 pt-1">
               <Button 
                 onClick={handleSavePreferences} 
                 disabled={saving}
-                className="flex-1 h-8 text-xs"
+                className="flex-1 h-8 text-xs bg-green-600 hover:bg-green-700"
               >
-                {saving ? 'Saving...' : 'Save'}
+                {saving ? (
+                  <span className="flex items-center">
+                    <span className="animate-spin mr-1 text-xs">●</span>
+                    Saving...
+                  </span>
+                ) : 'Save Preferences'}
               </Button>
               <Button 
                 variant="outline" 
                 onClick={handleClearMemory}
-                className="flex-1 h-8 text-xs"
+                className="flex-1 h-8 text-xs border-red-300 text-red-700 hover:bg-red-50"
               >
-                Clear
+                Clear Memory
               </Button>
             </div>
           </div>

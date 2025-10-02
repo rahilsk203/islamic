@@ -130,77 +130,79 @@ export function AuthModal({ open, onOpenChange, mode, backendUrl }: AuthModalPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[350px] w-full max-w-md mx-2 p-4">
-        <DialogHeader className="mb-2">
-          <DialogTitle className="text-xl font-bold text-center">
+      <DialogContent className="sm:max-w-[380px] w-full max-w-md mx-2 p-5 rounded-xl">
+        <DialogHeader className="mb-3">
+          <DialogTitle className="text-2xl font-bold text-center text-green-700">
             {currentMode === 'login' ? 'Welcome Back' : 'Create Account'}
           </DialogTitle>
-          <p className="text-center text-muted-foreground text-xs">
+          <p className="text-center text-muted-foreground text-sm mt-1">
             {currentMode === 'login' 
               ? 'Sign in to your IslamicAI account' 
               : 'Join IslamicAI to personalize your experience'}
           </p>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-xs font-medium">Email Address</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="h-10 text-sm"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-xs font-medium">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="h-10 text-sm"
-            />
-          </div>
-          {currentMode === 'signup' && (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-3">
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-xs font-medium">Confirm Password</Label>
+              <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
               <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-10 text-sm"
+                className="h-11 text-sm"
               />
             </div>
-          )}
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="h-11 text-sm"
+              />
+            </div>
+            {currentMode === 'signup' && (
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="h-11 text-sm"
+                />
+              </div>
+            )}
+          </div>
           {(error || localError) && (
-            <div className="text-red-500 text-xs bg-red-50 p-2 rounded-md">
+            <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">
               {error || localError}
             </div>
           )}
-          <div className="flex flex-col gap-2 pt-1">
-            <Button type="submit" disabled={loading} className="h-10 text-sm">
+          <div className="flex flex-col gap-3 pt-2">
+            <Button type="submit" disabled={loading} className="h-11 text-sm bg-green-600 hover:bg-green-700">
               {loading ? (
                 <span className="flex items-center">
-                  <span className="animate-spin mr-2 text-xs">●</span>
+                  <span className="animate-spin mr-2 text-sm">●</span>
                   {currentMode === 'login' ? 'Signing In...' : 'Creating Account...'}
                 </span>
               ) : currentMode === 'login' ? 'Sign In' : 'Create Account'}
             </Button>
             
-            <div className="relative my-2">
+            <div className="relative my-3">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-muted-foreground">Or continue with</span>
+                <span className="bg-white px-3 text-muted-foreground">Or continue with</span>
               </div>
             </div>
             
@@ -212,17 +214,17 @@ export function AuthModal({ open, onOpenChange, mode, backendUrl }: AuthModalPro
               variant="outline"
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="h-10 text-sm"
+              className="h-11 text-sm border-green-300 text-green-700 hover:bg-green-50"
             >
               {loading ? 'Loading...' : 'Continue with Google'}
             </Button>
             
-            <div className="text-center text-xs pt-1">
+            <div className="text-center text-sm pt-2">
               <Button
                 type="button"
                 variant="link"
                 onClick={() => handleModeChange(currentMode === 'login' ? 'signup' : 'login')}
-                className="p-0 h-auto font-normal text-sm"
+                className="p-0 h-auto font-normal text-green-600 hover:text-green-700"
               >
                 {currentMode === 'login' 
                   ? "Don't have an account? Sign Up" 

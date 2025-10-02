@@ -48,7 +48,7 @@
     height: -webkit-fill-available;
   }
 
-  /* Fix for mobile browsers address bar */
+  /* Mobile viewport fix */
   @media screen and (max-width: 768px) {
     html, body, #root {
       height: -webkit-fill-available;
@@ -318,5 +318,26 @@
       font-size: 0.75rem;
       line-height: 1rem;
     }
+  }
+  
+  /* Animation utilities */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .animate-in {
+    animation-duration: 0.2s;
+    animation-fill-mode: both;
+  }
+  
+  .fade-in {
+    animation-name: fadeIn;
+  }
+  
+  /* Fix for profile popup scrolling - removed scrollbars as per user preference */
+  .profile-popup-container {
+    max-height: 95vh;
+    overflow-y: hidden; /* Changed from auto to hidden to remove scrollbars */
   }
 }

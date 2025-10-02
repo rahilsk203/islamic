@@ -7,6 +7,7 @@ import ChatInput from '@/components/ChatInput';
 import TypingIndicator from '@/components/TypingIndicator';
 import { useMobileKeyboard } from '@/hooks';
 import { useAuth } from '@/contexts/AuthContext';
+import { fetchUserLanguagePreference, normalizeLanguagePreference } from '@/lib/userLanguage';
 
 interface Message {
   id: number;
@@ -37,14 +38,15 @@ const Index = () => {
   const [showTyping, setShowTyping] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('Connecting to backend...');
   const [editing, setEditing] = useState<{ index: number; text: string } | null>(null);
+  const [userLanguage, setUserLanguage] = useState<string | null>(null); // Add state for user language
   const { isKeyboardOpen } = useMobileKeyboard();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const activeAbortRef = useRef<AbortController | null>(null);
 
   // Configuration - Update this to match your backend URL
-  const BACKEND_URL = 'https://islamicai.sohal70760.workers.dev';
-  // const BACKEND_URL = 'http://127.0.0.1:8787';
+  // const BACKEND_URL = 'https://islamicai.sohal70760.workers.dev';
+  const BACKEND_URL = 'http://127.0.0.1:8787';
   const { token, isGuest } = useAuth();
 
   // Track whether user is near bottom to avoid forced scroll during read
@@ -120,6 +122,7 @@ const Index = () => {
       }
     } catch {}
     checkConnection();
+    fetchUserLanguage(); // Fetch user language preference
     
     // Handle page visibility changes (back button, app switch, etc.)
     const handleVisibilityChange = () => {
@@ -133,6 +136,46 @@ const Index = () => {
     
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  // Fetch user's language preference
+  const fetchUserLanguage = async () => {
+    try {
+      // Check if user is a real authenticated user (not a guest)
+      const isAuthenticatedUser = token && token !== 'test-token' && !isGuest;
+      
+      if (isAuthenticatedUser) {
+        const language = await fetchUserLanguagePreference(BACKEND_URL, token);
+        const normalizedLanguage = normalizeLanguagePreference(language);
+        setUserLanguage(normalizedLanguage);
+      } else {
+        // For guest users, clear the language preference
+        setUserLanguage(null);
+      }
+    } catch (error) {
+      console.error('Error fetching user language:', error);
+      setUserLanguage(null);
+    }
+  };
+
+  // Fetch user language when token or isGuest changes
+  useEffect(() => {
+    fetchUserLanguage();
+  }, [token, isGuest]);
+  
+  // Listen for user preferences updates
+  useEffect(() => {
+    const handleUserPreferencesUpdated = (event: CustomEvent) => {
+      const { language } = event.detail;
+      const normalizedLanguage = normalizeLanguagePreference(language);
+      setUserLanguage(normalizedLanguage);
+    };
+    
+    window.addEventListener('userPreferencesUpdated', handleUserPreferencesUpdated as EventListener);
+    
+    return () => {
+      window.removeEventListener('userPreferencesUpdated', handleUserPreferencesUpdated as EventListener);
     };
   }, []);
 
@@ -230,6 +273,11 @@ const Index = () => {
           enableStreaming: false
         }
       };
+      
+      // Add user's language preference if available
+      if (userLanguage) {
+        requestBody.user_language = userLanguage;
+      }
       
       // Add manual IP if set
       if (manualIP) {

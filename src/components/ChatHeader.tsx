@@ -109,17 +109,17 @@ const ChatHeaderBase = ({ onToggleSidebar, onNewChat, backendUrl }: { onToggleSi
       
       {/* Profile Popup - Fixed position, no scrolling, smaller size */}
       {isAuthenticatedUser && profileOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-2 sm:p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-2 sm:p-4 animate-in fade-in">
           <div className="relative w-full max-w-md">
             <Button 
               variant="ghost" 
               size="icon"
-              className="absolute top-2 right-2 text-muted-foreground hover:text-foreground rounded-full p-1 z-10 bg-white shadow"
+              className="absolute -top-3 -right-3 text-muted-foreground hover:text-foreground rounded-full p-1 z-10 bg-white shadow-lg border border-gray-200 h-8 w-8"
               onClick={() => setProfileOpen(false)}
             >
               <span className="text-xl">×</span>
             </Button>
-            <div className="max-h-[90vh] overflow-hidden">
+            <div className="profile-popup-container">
               <UserProfile backendUrl={backendUrl} />
             </div>
           </div>
