@@ -44,7 +44,7 @@ const Index = () => {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const activeAbortRef = useRef<AbortController | null>(null);
 
-  8                                      // Configuration - Update this to match your backend URL
+  // Configuration - Update this to match your backend URL
   const BACKEND_URL = 'https://islamicai.sohal70760.workers.dev';
   // const BACKEND_URL = 'http://127.0.0.1:8787';
   const { token, isGuest } = useAuth();
@@ -52,6 +52,7 @@ const Index = () => {
   // Track whether user is near bottom to avoid forced scroll during read
   const isUserNearBottomRef = useRef(true);
   const lastScrollTopRef = useRef(0);
+  const isAutoScrollingRef = useRef(false);
 
   // Determine if user is near bottom
   const evaluateIsNearBottom = useCallback(() => {
@@ -67,6 +68,9 @@ const Index = () => {
     const container = messagesContainerRef.current;
     if (!container) return;
     const onScroll = () => {
+      // If we're auto-scrolling, don't update the near-bottom state
+      if (isAutoScrollingRef.current) return;
+      
       isUserNearBottomRef.current = evaluateIsNearBottom();
       lastScrollTopRef.current = container.scrollTop;
     };
@@ -79,7 +83,14 @@ const Index = () => {
   // Smooth auto-scroll to bottom
   const scrollToBottom = useCallback((smooth: boolean = true) => {
     if (!isUserNearBottomRef.current) return;
+    
+    isAutoScrollingRef.current = true;
     messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+    
+    // Reset auto-scrolling flag after a short delay
+    setTimeout(() => {
+      isAutoScrollingRef.current = false;
+    }, 100);
   }, []);
 
   // Scroll to bottom when messages change
@@ -88,10 +99,30 @@ const Index = () => {
     if (!isKeyboardOpen) {
       // Small delay to ensure DOM is updated
       setTimeout(() => {
-        scrollToBottom(false);
-      }, 50);
+        scrollToBottom(true); // Always use smooth scrolling
+      }, 10);
     }
   }, [messages, scrollToBottom, isKeyboardOpen]);
+
+  // Additional scroll effect to handle edge cases
+  useEffect(() => {
+    const handleMessagesUpdate = () => {
+      if (!isKeyboardOpen && isUserNearBottomRef.current) {
+        // Extra check to ensure we're at the bottom after DOM updates
+        setTimeout(() => {
+          scrollToBottom(true);
+        }, 50);
+      }
+    };
+    
+    // Call the handler
+    handleMessagesUpdate();
+    
+    // Also call on next tick to catch any delayed renders
+    const timeoutId = setTimeout(handleMessagesUpdate, 100);
+    
+    return () => clearTimeout(timeoutId);
+  }, [messages.length, isKeyboardOpen, scrollToBottom]);
 
   // Debounced persistence of session
   const persistSessionDebounced = useRef(
@@ -257,6 +288,8 @@ const Index = () => {
         const now = performance.now();
         if (now - lastCommit >= commitIntervalMs || i + charactersPerTick >= fullText.length) {
           setMessages(prev => prev.map(m => m.id === targetId ? { ...m, message: shown } : m));
+          // Scroll to bottom during typing
+          setTimeout(() => scrollToBottom(true), 0);
           lastCommit = now;
         }
         await new Promise(res => setTimeout(res, 16));
@@ -355,6 +388,8 @@ const Index = () => {
                           const commit = pendingChunk;
                           pendingChunk = '';
                           setMessages(prev => prev.map(m => m.id === newId ? { ...m, message: m.message + commit } : m));
+                          // Scroll to bottom during streaming
+                          setTimeout(() => scrollToBottom(true), 0);
                           lastCommit = now;
                         }
                       }
@@ -365,6 +400,8 @@ const Index = () => {
                         const commit = pendingChunk;
                         pendingChunk = '';
                         setMessages(prev => prev.map(m => m.id === newId ? { ...m, message: m.message + commit } : m));
+                        // Scroll to bottom during streaming
+                        setTimeout(() => scrollToBottom(true), 0);
                         lastCommit = now;
                       }
                     }
@@ -377,6 +414,8 @@ const Index = () => {
               const commit = pendingChunk;
               pendingChunk = '';
               setMessages(prev => prev.map(m => m.id === newId ? { ...m, message: m.message + commit } : m));
+              // Scroll to bottom after streaming completes
+              setTimeout(() => scrollToBottom(true), 50);
             }
           }
         } else {
@@ -401,6 +440,9 @@ const Index = () => {
             // Update location info if it's already displayed
             setLocationInfo(data.location_info);
           }
+          
+          // Scroll to bottom after typing completes
+          setTimeout(() => scrollToBottom(true), 50);
         }
       } else {
         try {
@@ -445,8 +487,10 @@ const Index = () => {
       setIsSending(false);
       setShowTyping(false);
       activeAbortRef.current = null;
+      // Ensure we scroll to bottom when response is complete
+      setTimeout(() => scrollToBottom(true), 100);
     }
-  }, [isSending, manualIP, sessionId, locationInfo, token, isGuest]);
+  }, [isSending, manualIP, sessionId, locationInfo, token, isGuest, scrollToBottom]);
 
   const toggleSidebar = useCallback(() => {
     setIsSidebarOpen(prev => !prev);
@@ -480,7 +524,7 @@ const Index = () => {
   }, [handleSendMessage]);
 
   return (
-    <div className="flex min-h-[100dvh] h-full bg-white overflow-hidden">
+    <div className="flex min-h-[100dvh] h-full bg-white overflow-hidden relative chat-container">
       <ChatSidebar 
         isOpen={isSidebarOpen} 
         onClose={closeSidebar}
@@ -495,13 +539,13 @@ const Index = () => {
         }}
       />
       
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative z-0">
         <ChatHeader onToggleSidebar={toggleSidebar} onNewChat={newSession} backendUrl={BACKEND_URL} />
         
         {/* Messages Container with Fixed Scrolling */}
         <div 
           ref={messagesContainerRef}
-          className="flex-1 overflow-y-auto bg-white min-h-0 overscroll-contain transform-gpu gpu-boost long-text-container"
+          className="flex-1 overflow-y-auto bg-white min-h-0 overscroll-contain transform-gpu gpu-boost long-text-container relative scroll-smooth"
           style={{ 
             marginBottom: isKeyboardOpen ? 'env(safe-area-inset-bottom)' : '0',
             paddingBottom: isKeyboardOpen ? '1rem' : '0'

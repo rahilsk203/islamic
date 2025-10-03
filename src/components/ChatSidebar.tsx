@@ -78,11 +78,11 @@ const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?:
       
       {/* Sidebar */}
       <div className={`
-        fixed lg:static inset-y-0 left-0 z-50 lg:z-auto
+        fixed lg:static inset-y-0 left-0 z-50 lg:z-40
         w-72 bg-white h-screen flex flex-col border-r border-sidebar-border shadow-lg
         transition-transform duration-300 ease-in-out lg:translate-x-0
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:z-10
+        lg:z-10 mobile-sidebar
       `}>
         {/* Logo - Fixed at top */}
         <div className="p-5 flex items-center gap-3 border-b border-sidebar-border flex-shrink-0">
