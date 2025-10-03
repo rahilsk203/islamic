@@ -529,6 +529,7 @@ const Index = () => {
         isOpen={isSidebarOpen} 
         onClose={closeSidebar}
         onNewChat={newSession}
+        onSendMessage={handleSendMessage}
         onSelectSession={(id) => {
           const data = readSession(id);
           if (data) {

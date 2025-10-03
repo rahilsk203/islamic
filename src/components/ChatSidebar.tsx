@@ -16,13 +16,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { readSessionsIndex } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import HelpFAQ from '@/components/HelpFAQ';
 
-const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?: boolean; onClose?: () => void; onNewChat?: () => void; onSelectSession?: (id: string) => void }) => {
+const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession, onSendMessage }: { isOpen?: boolean; onClose?: () => void; onNewChat?: () => void; onSelectSession?: (id: string) => void; onSendMessage?: (message: string) => void; }) => {
   const { user, logout, token, isGuest } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [sessions, setSessions] = useState(readSessionsIndex());
   const deferredQuery = useDeferredValue(searchQuery);
   const [isMobile, setIsMobile] = useState(false);
+  const [showHelpFAQ, setShowHelpFAQ] = useState(false);
 
   // Check if device is mobile
   useEffect(() => {
@@ -52,17 +54,6 @@ const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?:
     { icon: UserIcon, label: 'Seerah', hasSubMenu: false },
   ];
 
-  const chatHistory = [
-    'Understanding Tawheed',
-    'Prayer Guidelines',
-    'Ramadan Preparation',
-    'Zakat Calculation',
-    'Hajj Requirements',
-    'Islamic Finance',
-    'Family Relations',
-    'Character Development'
-  ];
-
   // Check if user is a real authenticated user (not a guest)
   const isAuthenticatedUser = user && token && token !== 'test-token' && !isGuest;
 
@@ -76,16 +67,19 @@ const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?:
         />
       )}
       
+      {/* Help & FAQ Modal */}
+      {showHelpFAQ && <HelpFAQ onClose={() => setShowHelpFAQ(false)} />}
+      
       {/* Sidebar */}
       <div className={`
         fixed lg:static inset-y-0 left-0 z-50 lg:z-40
-        w-72 bg-white h-screen flex flex-col border-r border-sidebar-border shadow-lg
-        transition-transform duration-300 ease-in-out lg:translate-x-0
+        w-72 bg-white h-screen flex flex-col border-r border-sidebar-border sidebar-shadow
+        transition-transform duration-300 ease-in-out lg:translate-x-0 sidebar-transition
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:z-10 mobile-sidebar
       `}>
         {/* Logo - Fixed at top */}
-        <div className="p-5 flex items-center gap-3 border-b border-sidebar-border flex-shrink-0">
+        <div className="p-5 flex items-center gap-3 border-b border-sidebar-border flex-shrink-0 relative">
           <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
             <BookOpenIcon className="w-7 h-7 text-white" />
           </div>
@@ -101,7 +95,7 @@ const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?:
             <Button 
               variant="ghost" 
               size="icon"
-              className="ml-auto lg:hidden text-muted-foreground hover:text-foreground hover:bg-gray-100 rounded-full p-2"
+              className="ml-auto lg:hidden text-muted-foreground hover:text-foreground hover:bg-gray-100 rounded-full p-2 absolute top-4 right-4"
               onClick={onClose}
             >
               <XIcon className="w-6 h-6" />
@@ -110,32 +104,40 @@ const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?:
         </div>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto pt-2">
           {/* New Chat Button */}
-          <div className="px-3 py-4">
+          <div className="px-4 py-3">
             <Button 
               variant="outline" 
-              className="w-full justify-between gap-3 h-12 hover:bg-green-50 text-sidebar-text border-green-200 hover:border-green-300"
+              className="w-full justify-between gap-3 h-12 hover:bg-green-50 text-sidebar-text border-green-200 hover:border-green-300 rounded-xl shadow-sm sidebar-button"
               onClick={onNewChat}
             >
               <div className="flex items-center gap-2">
                 <PlusIcon className="w-5 h-5" />
-                <span className="hidden sm:inline">New Chat</span>
+                <span className="font-medium">New Chat</span>
               </div>
               <ChevronRightIcon className="w-5 h-5" />
             </Button>
           </div>
 
           {/* Search */}
-          <div className="px-3 mb-4">
+          <div className="px-4 mb-4">
             <div className="relative">
-              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-sidebar-text-muted" />
               <Input
                 placeholder="Search topics..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-gray-50 border-none h-12 text-sidebar-text placeholder:text-sidebar-text-muted hover:bg-gray-100 focus:bg-white focus:ring-2 focus:ring-green-500 rounded-xl"
+                className="px-4 sidebar-search-input h-12 transition-all duration-200 focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sidebar-text-muted hover:text-sidebar-text transition-colors duration-200"
+                  aria-label="Clear search"
+                >
+                  <XIcon className="w-5 h-5" />
+                </button>
+              )}
             </div>
           </div>
 
@@ -149,13 +151,50 @@ const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?:
                 <Button
                   key={index}
                   variant="ghost"
-                  className="w-full justify-between gap-3 h-12 mb-1 hover:bg-green-50 text-sidebar-text rounded-xl"
+                  className="w-full justify-between gap-3 h-12 mb-1 hover:bg-green-50 text-sidebar-text rounded-xl transition-colors sidebar-button"
+                  onClick={() => {
+                    // Handle menu item clicks
+                    let prompt = '';
+                    switch(item.label) {
+                      case 'Quran':
+                        prompt = 'Tell me about the Quran and its significance in Islam';
+                        break;
+                      case 'Hadith':
+                        prompt = 'Explain the importance of Hadith in Islamic teachings';
+                        break;
+                      case 'Prayer Times':
+                        prompt = 'Provide information about the five daily prayers in Islam and their timings';
+                        break;
+                      case 'Seerah':
+                        prompt = 'Tell me about the life of Prophet Muhammad (PBUH)';
+                        break;
+                      default:
+                        prompt = `Tell me about ${item.label}`;
+                    }
+                    
+                    // Start a new chat
+                    if (onNewChat) {
+                      onNewChat();
+                    }
+                    
+                    // Send the prompt after a short delay to ensure the new chat is ready
+                    setTimeout(() => {
+                      if (onSendMessage) {
+                        onSendMessage(prompt);
+                      }
+                    }, 100);
+                    
+                    // Close sidebar on mobile
+                    if (isMobile) {
+                      onClose?.();
+                    }
+                  }}
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
                       <item.icon className="w-5 h-5 text-green-600" />
                     </div>
-                    <span className="hidden sm:inline">{item.label}</span>
+                    <span className="font-medium">{item.label}</span>
                   </div>
                   <ChevronRightIcon className="w-5 h-5 text-sidebar-text-muted" />
                 </Button>
@@ -179,7 +218,7 @@ const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?:
                 <Button
                   key={s.id}
                   variant="ghost"
-                  className={`w-full justify-start gap-3 h-12 text-sm hover:bg-green-50 text-sidebar-text text-left truncate rounded-xl ${
+                  className={`w-full justify-start gap-3 h-12 text-sm hover:bg-green-50 text-sidebar-text text-left truncate rounded-xl transition-colors sidebar-button ${
                     index === 0 ? 'bg-green-50 border border-green-200' : ''
                   }`}
                   onClick={() => {
@@ -191,39 +230,39 @@ const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?:
                   }}
                 >
                   <BookOpenIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span className="truncate">{s.title}</span>
+                  <span className="truncate font-medium">{s.title}</span>
                 </Button>
               ))}
             </div>
           </div>
 
           {/* User Profile & Settings */}
-          <div className="px-3 pb-6">
+          <div className="px-3 pb-6 mt-auto">
             <div className="space-y-1">
               <Button 
                 variant="ghost" 
-                className="w-full justify-start gap-3 h-12 hover:bg-gray-100 text-sidebar-text rounded-xl"
-              >
-                <SettingsIcon className="w-5 h-5" />
-                <span className="hidden sm:inline">Settings</span>
-              </Button>
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start gap-3 h-12 hover:bg-gray-100 text-sidebar-text rounded-xl"
+                className="w-full justify-start gap-3 h-12 hover:bg-gray-100 text-sidebar-text rounded-xl transition-colors sidebar-button"
+                onClick={() => {
+                  setShowHelpFAQ(true);
+                  // Close sidebar on mobile after clicking
+                  if (isMobile) {
+                    onClose?.();
+                  }
+                }}
               >
                 <HelpCircleIcon className="w-5 h-5" />
-                <span className="hidden sm:inline">Help & FAQ</span>
+                <span className="font-medium">Help & FAQ</span>
               </Button>
               
               {/* Show Sign Out button only for authenticated users */}
               {isAuthenticatedUser && (
                 <Button 
                   variant="ghost" 
-                  className="w-full justify-start gap-3 h-12 hover:bg-gray-100 text-sidebar-text rounded-xl"
+                  className="w-full justify-start gap-3 h-12 hover:bg-red-50 text-red-600 rounded-xl transition-colors sidebar-button"
                   onClick={logout}
                 >
                   <LogOutIcon className="w-5 h-5" />
-                  <span className="hidden sm:inline">Sign Out</span>
+                  <span className="font-medium">Sign Out</span>
                 </Button>
               )}
             </div>
