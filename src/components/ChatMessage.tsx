@@ -26,6 +26,21 @@ interface ChatMessageProps {
 const ChatMessageBase = ({ message, isUser = false, onRegenerate, onEditUser, onCancelEdit, onSaveEdit, isEditing }: ChatMessageProps) => {
   const [editText, setEditText] = useState(message);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkIsMobile = () => {
+      if (typeof window !== 'undefined') {
+        const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        setIsMobile(mobile);
+      }
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   const handleCopy = useCallback(async () => {
     try {
@@ -143,15 +158,15 @@ const ChatMessageBase = ({ message, isUser = false, onRegenerate, onEditUser, on
               <div className="whitespace-pre-wrap leading-relaxed break-words">{message}</div>
             </div>
           ) : (
-            // Display mode for bot messages
+            // Display mode for bot messages with mobile optimization
             <div className="max-w-full w-full">
               <MarkdownMessage text={message} />
             </div>
           )}
           
-          {/* Action Buttons */}
+          {/* Action Buttons - Optimized for mobile */}
           {!isEditing && (
-            <div className={`flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity ${isUser ? 'justify-end' : 'justify-start'}`}>
+            <div className={`flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity ${isUser ? 'justify-end' : 'justify-start'} ${isMobile ? 'group-hover:opacity-100' : ''}`}>
               {!isUser ? (
                 <>
                   <Button onClick={handleCopy} variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100 text-gray-500 hover:text-gray-700">

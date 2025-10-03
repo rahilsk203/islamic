@@ -40,6 +40,21 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
   const [message, setMessage] = useState('');
   const [profileData, setProfileData] = useState<UserProfileData | null>(null);
   const [memoryProfile, setMemoryProfile] = useState<UserMemoryProfile | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkIsMobile = () => {
+      if (typeof window !== 'undefined') {
+        const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        setIsMobile(mobile);
+      }
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   // Check if user is a real authenticated user (not a guest)
   const isAuthenticatedUser = user && token && token !== 'test-token' && !isGuest;
@@ -225,7 +240,7 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
                 const event = new CustomEvent('openAuthModal', { detail: { mode: 'login' } });
                 window.dispatchEvent(event);
               }}
-              className="w-full h-8 text-xs bg-green-600 hover:bg-green-700"
+              className="w-full h-8 text-xs bg-green-600 hover:bg-green-700 touch-optimized-button"
             >
               <LockIcon className="mr-1 h-3 w-3" />
               Sign In
@@ -266,7 +281,7 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
             <Button 
               variant="outline" 
               onClick={logout}
-              className="h-8 px-2 text-xs border-green-300 text-green-700 hover:bg-green-50"
+              className="h-8 px-2 text-xs border-green-300 text-green-700 hover:bg-green-50 touch-optimized-button"
             >
               <LogOutIcon className="mr-1 h-3 w-3" />
               Sign Out
@@ -315,7 +330,7 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
               <div className="space-y-1.5">
                 <Label htmlFor="language" className="text-xs font-medium">Language</Label>
                 <Select value={language} onValueChange={setLanguage}>
-                  <SelectTrigger className="h-8 text-xs">
+                  <SelectTrigger className="h-8 text-xs touch-optimized-button">
                     <SelectValue placeholder="Select language" />
                   </SelectTrigger>
                   <SelectContent>
@@ -329,7 +344,7 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
               <div className="space-y-1.5">
                 <Label htmlFor="madhhab" className="text-xs font-medium">Madhhab</Label>
                 <Select value={madhhab} onValueChange={setMadhhab}>
-                  <SelectTrigger className="h-8 text-xs">
+                  <SelectTrigger className="h-8 text-xs touch-optimized-button">
                     <SelectValue placeholder="Select madhhab" />
                   </SelectTrigger>
                   <SelectContent>
@@ -364,11 +379,11 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
               </div>
             )}
             
-            <div className="flex gap-2 pt-1">
+            <div className="flex gap-2 pt-1 flex-col sm:flex-row">
               <Button 
                 onClick={handleSavePreferences} 
                 disabled={saving}
-                className="flex-1 h-8 text-xs bg-green-600 hover:bg-green-700"
+                className="flex-1 h-8 text-xs bg-green-600 hover:bg-green-700 touch-optimized-button"
               >
                 {saving ? (
                   <span className="flex items-center">
@@ -380,7 +395,7 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
               <Button 
                 variant="outline" 
                 onClick={handleClearMemory}
-                className="flex-1 h-8 text-xs border-red-300 text-red-700 hover:bg-red-50"
+                className="flex-1 h-8 text-xs border-red-300 text-red-700 hover:bg-red-50 touch-optimized-button"
               >
                 Clear Memory
               </Button>

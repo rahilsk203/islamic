@@ -9,7 +9,8 @@ import {
   SettingsIcon,
   HelpCircleIcon,
   LogOutIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  XIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +22,21 @@ const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?:
   const [searchQuery, setSearchQuery] = useState('');
   const [sessions, setSessions] = useState(readSessionsIndex());
   const deferredQuery = useDeferredValue(searchQuery);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkIsMobile = () => {
+      if (typeof window !== 'undefined') {
+        const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        setIsMobile(mobile);
+      }
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   useEffect(() => {
     // refresh from storage when sidebar opens
@@ -79,6 +95,17 @@ const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?:
           <div className="block sm:hidden">
             <h2 className="text-lg font-bold text-foreground">IslamicAI</h2>
           </div>
+          {/* Close button for mobile */}
+          {isMobile && (
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="ml-auto lg:hidden text-muted-foreground hover:text-foreground hover:bg-gray-100 rounded-full p-2"
+              onClick={onClose}
+            >
+              <XIcon className="w-6 h-6" />
+            </Button>
+          )}
         </div>
 
         {/* Scrollable Content Area */}
@@ -154,7 +181,13 @@ const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?:
                   className={`w-full justify-start gap-3 h-12 text-sm hover:bg-green-50 text-sidebar-text text-left truncate rounded-xl ${
                     index === 0 ? 'bg-green-50 border border-green-200' : ''
                   }`}
-                  onClick={() => onSelectSession?.(s.id)}
+                  onClick={() => {
+                    onSelectSession?.(s.id);
+                    // Close sidebar on mobile after selecting
+                    if (isMobile) {
+                      onClose?.();
+                    }
+                  }}
                 >
                   <BookOpenIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
                   <span className="truncate">{s.title}</span>

@@ -3,6 +3,7 @@ import { SendIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useMobileKeyboard } from '@/hooks';
+import { isMobileDevice, isIOS, preventIOSZoom, restoreIOSZoom } from '@/lib/mobileUtils';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -17,12 +18,7 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const wasKeyboardOpenRef = useRef(false);
-
-  // Check if device is mobile
-  const isMobile = () => {
-    if (typeof window === 'undefined') return false;
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  };
+  const [isComposing, setIsComposing] = useState(false); // For handling IME composition
 
   const autoresizeTextarea = () => {
     const el = textareaRef.current;
@@ -32,9 +28,9 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
     el.style.height = 'auto';
     
     // Calculate max height based on viewport - only apply mobile-specific limits on mobile
-    const maxHeight = isMobile() && isKeyboardOpen 
+    const maxHeight = isMobileDevice() && isKeyboardOpen 
       ? Math.min(150, window.innerHeight * 0.3) 
-      : isMobile()
+      : isMobileDevice()
       ? Math.min(150, window.innerHeight * 0.2)
       : 150; // Fixed max height for desktop
     
@@ -62,7 +58,7 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
   // Additional effect to handle mobile keyboard changes
   useEffect(() => {
     // Only apply on mobile devices
-    if (!isMobile()) return;
+    if (!isMobileDevice()) return;
     
     // Detect keyboard state changes
     if (wasKeyboardOpenRef.current !== isKeyboardOpen) {
@@ -88,29 +84,52 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
     }
   }, [isKeyboardOpen]);
 
+  // Handle iOS zoom prevention
+  useEffect(() => {
+    if (isMobileDevice() && isIOS()) {
+      preventIOSZoom();
+      
+      return () => {
+        restoreIOSZoom();
+      };
+    }
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim()) {
+    if (message.trim() && !isComposing) { // Prevent sending during IME composition
       onSendMessage(message.trim());
       setMessage(''); // Always clear the input after sending
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Don't submit when IME is composing (e.g., for Asian languages)
+    if (isComposing) return;
+    
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e);
     }
   };
 
+  // Handle IME composition events for better mobile input
+  const handleCompositionStart = () => {
+    setIsComposing(true);
+  };
+
+  const handleCompositionEnd = () => {
+    setIsComposing(false);
+  };
+
   return (
     <div 
       ref={containerRef}
       className={`border-t border-border bg-chat-bg transition-all duration-300 ${
-        isMobile() && isKeyboardOpen ? 'fixed inset-x-0 bottom-0 pb-2 safe-bottom-padding keyboard-visible' : ''
+        isMobileDevice() && isKeyboardOpen ? 'fixed inset-x-0 bottom-0 pb-2 safe-bottom-padding keyboard-visible' : ''
       }`}
     >
-      <div className={`max-w-4xl mx-auto p-4 ${isMobile() && isKeyboardOpen ? 'pb-2' : ''}`}>
+      <div className={`max-w-4xl mx-auto p-4 ${isMobileDevice() && isKeyboardOpen ? 'pb-2' : ''}`}>
         <form onSubmit={handleSubmit} className="relative">
           <div className="flex items-end gap-3 bg-white border border-gray-300 rounded-2xl p-1 shadow-sm focus-within:ring-2 focus-within:ring-green-500 focus-within:border-green-500 transition-all">
             <Textarea
@@ -121,6 +140,8 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
                 onChangeValue?.(e.target.value);
               }}
               onKeyDown={handleKeyDown}
+              onCompositionStart={handleCompositionStart}
+              onCompositionEnd={handleCompositionEnd}
               placeholder="Ask about Islam, Quran, etc..."
               className="flex-1 min-h-[40px] max-h-[150px] resize-none border-none bg-transparent p-3 text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 mobile-transition"
               rows={1}
@@ -130,8 +151,8 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
             <Button
               type="submit"
               size="icon"
-              disabled={!message.trim()}
-              className="h-10 w-10 m-1 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:hover:bg-green-600 rounded-full transition-colors flex-shrink-0"
+              disabled={!message.trim() || isComposing}
+              className="h-10 w-10 m-1 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:hover:bg-green-600 rounded-full transition-colors flex-shrink-0 touch-optimized-button"
             >
               <SendIcon className="w-5 h-5" />
             </Button>

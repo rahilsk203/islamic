@@ -246,6 +246,17 @@
       outline: none;
       box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
     }
+    
+    /* Optimize for touch targets */
+    button, a, input, textarea, select {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    /* Better text selection on mobile */
+    ::selection {
+      background: rgba(34, 197, 94, 0.3);
+    }
   }
   
   /* Long text handling */
@@ -284,6 +295,13 @@
       padding-left: 0.75rem;
       padding-right: 0.75rem;
     }
+    
+    /* Optimize button sizes for touch */
+    .touch-optimized-button {
+      min-height: 44px;
+      min-width: 44px;
+      padding: 10px;
+    }
   }
   
   /* Desktop-specific styles */
@@ -318,6 +336,15 @@
       font-size: 0.75rem;
       line-height: 1rem;
     }
+    
+    /* Optimize spacing for small screens */
+    .xs\:gap-1 {
+      gap: 0.25rem;
+    }
+    
+    .xs\:p-1 {
+      padding: 0.25rem;
+    }
   }
   
   /* Animation utilities */
@@ -339,5 +366,28 @@
   .profile-popup-container {
     max-height: 95vh;
     overflow-y: hidden; /* Changed from auto to hidden to remove scrollbars */
+  }
+  
+  /* DSA-level optimizations for performance */
+  .optimize-rendering {
+    contain: layout style paint;
+  }
+  
+  .will-change-transform {
+    will-change: transform;
+  }
+  
+  .hardware-accelerate {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+  
+  /* Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }

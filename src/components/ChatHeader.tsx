@@ -1,4 +1,4 @@
-import { BookOpenIcon, PlusIcon, Menu, UserIcon } from 'lucide-react';
+import { BookOpenIcon, PlusIcon, Menu, UserIcon, XIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { memo, useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,6 +10,21 @@ const ChatHeaderBase = ({ onToggleSidebar, onNewChat, backendUrl }: { onToggleSi
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [profileOpen, setProfileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkIsMobile = () => {
+      if (typeof window !== 'undefined') {
+        const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        setIsMobile(mobile);
+      }
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   // Listen for custom event to open auth modal
   useEffect(() => {
@@ -110,16 +125,19 @@ const ChatHeaderBase = ({ onToggleSidebar, onNewChat, backendUrl }: { onToggleSi
       {/* Profile Popup - Fixed position, no scrolling, smaller size */}
       {isAuthenticatedUser && profileOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-2 sm:p-4 animate-in fade-in">
-          <div className="relative w-full max-w-md">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="absolute -top-3 -right-3 text-muted-foreground hover:text-foreground rounded-full p-1 z-10 bg-white shadow-lg border border-gray-200 h-8 w-8"
-              onClick={() => setProfileOpen(false)}
-            >
-              <span className="text-xl">×</span>
-            </Button>
-            <div className="profile-popup-container">
+          <div className="relative w-full max-w-md max-h-[90vh] overflow-hidden">
+            {/* Close button for mobile */}
+            {isMobile && (
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="absolute -top-3 -right-3 text-muted-foreground hover:text-foreground rounded-full p-1 z-10 bg-white shadow-lg border border-gray-200 h-8 w-8"
+                onClick={() => setProfileOpen(false)}
+              >
+                <XIcon className="w-5 h-5" />
+              </Button>
+            )}
+            <div className="profile-popup-container overflow-y-auto max-h-[90vh]">
               <UserProfile backendUrl={backendUrl} />
             </div>
           </div>
