@@ -26,6 +26,18 @@ const ChatHeaderBase = ({ onToggleSidebar, onNewChat, backendUrl }: { onToggleSi
     return () => window.removeEventListener('resize', checkIsMobile);
   }, []);
 
+  // Listen for custom event to close profile popup
+  useEffect(() => {
+    const handleCloseProfilePopup = () => {
+      setProfileOpen(false);
+    };
+
+    window.addEventListener('closeProfilePopup', handleCloseProfilePopup);
+    return () => {
+      window.removeEventListener('closeProfilePopup', handleCloseProfilePopup);
+    };
+  }, []);
+
   // Listen for custom event to open auth modal
   useEffect(() => {
     const handleOpenAuthModal = (event: CustomEvent) => {
@@ -137,7 +149,7 @@ const ChatHeaderBase = ({ onToggleSidebar, onNewChat, backendUrl }: { onToggleSi
                 <XIcon className="w-5 h-5" />
               </Button>
             )}
-            <div className="profile-popup-container overflow-y-auto max-h-[90vh]">
+            <div className="profile-popup-container">
               <UserProfile backendUrl={backendUrl} />
             </div>
           </div>

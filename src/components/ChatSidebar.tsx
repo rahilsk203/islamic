@@ -82,6 +82,7 @@ const ChatSidebar = ({ isOpen, onClose, onNewChat, onSelectSession }: { isOpen?:
         w-72 bg-white h-screen flex flex-col border-r border-sidebar-border shadow-lg
         transition-transform duration-300 ease-in-out lg:translate-x-0
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:z-10
       `}>
         {/* Logo - Fixed at top */}
         <div className="p-5 flex items-center gap-3 border-b border-sidebar-border flex-shrink-0">

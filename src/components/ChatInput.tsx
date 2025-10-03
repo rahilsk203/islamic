@@ -126,7 +126,7 @@ const ChatInput = ({ onSendMessage, value, onChangeValue, autoFocus }: ChatInput
     <div 
       ref={containerRef}
       className={`border-t border-border bg-chat-bg transition-all duration-300 ${
-        isMobileDevice() && isKeyboardOpen ? 'fixed inset-x-0 bottom-0 pb-2 safe-bottom-padding keyboard-visible' : ''
+        isMobileDevice() && isKeyboardOpen ? 'fixed inset-x-0 bottom-0 pb-2 safe-bottom-padding keyboard-visible z-50' : ''
       }`}
     >
       <div className={`max-w-4xl mx-auto p-4 ${isMobileDevice() && isKeyboardOpen ? 'pb-2' : ''}`}>

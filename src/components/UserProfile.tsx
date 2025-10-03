@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
-import { UserIcon, LockIcon, LogOutIcon } from 'lucide-react';
+import { UserIcon, LockIcon, LogOutIcon, XIcon } from 'lucide-react';
 
 interface UserProfileProps {
   backendUrl: string;
@@ -197,6 +197,12 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
     }
   };
 
+  // Function to close the profile popup
+  const handleClose = () => {
+    // Dispatch a custom event to notify the parent component to close the popup
+    window.dispatchEvent(new CustomEvent('closeProfilePopup'));
+  };
+
   // For guest users, show a message instead of trying to load profile data
   if (!isAuthenticatedUser) {
     return (
@@ -278,17 +284,26 @@ export function UserProfile({ backendUrl }: UserProfileProps) {
               <CardTitle className="text-base">Your Profile</CardTitle>
               <CardDescription className="mt-0.5 text-xs">Manage your settings</CardDescription>
             </div>
-            <Button 
-              variant="outline" 
-              onClick={logout}
-              className="h-8 px-2 text-xs border-green-300 text-green-700 hover:bg-green-50 touch-optimized-button"
-            >
-              <LogOutIcon className="mr-1 h-3 w-3" />
-              Sign Out
-            </Button>
+            <div className="flex gap-1">
+              <Button 
+                variant="outline" 
+                onClick={logout}
+                className="h-8 px-2 text-xs border-green-300 text-green-700 hover:bg-green-50 touch-optimized-button"
+              >
+                <LogOutIcon className="mr-1 h-3 w-3" />
+                Sign Out
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleClose}
+                className="h-8 px-2 text-xs border-gray-300 text-gray-700 hover:bg-gray-100 touch-optimized-button"
+              >
+                <XIcon className="h-3 w-3" />
+              </Button>
+            </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3 py-3 px-3">
+        <CardContent className="space-y-3 py-3 px-3 max-h-[70vh] overflow-y-auto">
           <div className="p-2 bg-green-50 rounded-lg border border-green-100">
             <div className="flex items-center gap-2">
               <div className="bg-green-200 rounded-full p-1.5 w-10 h-10 flex items-center justify-center">

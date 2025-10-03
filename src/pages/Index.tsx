@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { debounce, readSession, readSessionsIndex, writeSession, generateSessionTitleFromMessage } from '@/lib/utils';
 import ChatSidebar from '@/components/ChatSidebar';
 import ChatHeader from '@/components/ChatHeader';
@@ -43,9 +43,8 @@ const Index = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const activeAbortRef = useRef<AbortController | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
 
-  // Configuration - Update this to match your backend URL
+  8                                      // Configuration - Update this to match your backend URL
   const BACKEND_URL = 'https://islamicai.sohal70760.workers.dev';
   // const BACKEND_URL = 'http://127.0.0.1:8787';
   const { token, isGuest } = useAuth();
@@ -53,20 +52,6 @@ const Index = () => {
   // Track whether user is near bottom to avoid forced scroll during read
   const isUserNearBottomRef = useRef(true);
   const lastScrollTopRef = useRef(0);
-
-  // Check if device is mobile
-  useEffect(() => {
-    const checkIsMobile = () => {
-      if (typeof window !== 'undefined') {
-        const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        setIsMobile(mobile);
-      }
-    };
-    
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
 
   // Determine if user is near bottom
   const evaluateIsNearBottom = useCallback(() => {
@@ -233,52 +218,6 @@ const Index = () => {
     ]);
   }, []);
 
-  // Memoize the message processing to improve performance
-  const processedMessages = useMemo(() => {
-    return messages.map((msg, idx) => {
-      const onRegenerate = !msg.isUser
-        ? () => {
-            // find the nearest preceding user message
-            for (let i = idx - 1; i >= 0; i--) {
-              if (messages[i].isUser) {
-                // remove current bot message and regenerate in its place without echoing user
-                setMessages(prev => {
-                  const arr = [...prev];
-                  arr.splice(idx, 1);
-                  return arr;
-                });
-                handleSendMessage(messages[i].message, { echoUser: false, insertAtIndex: idx, force: true });
-                break;
-              }
-            }
-          }
-        : undefined;
-      const onEditUser = msg.isUser
-        ? () => {
-            setEditing({ index: idx, text: msg.message });
-          }
-        : undefined;
-      const onCancelEdit = msg.isUser
-        ? () => {
-            cancelEdit();
-          }
-        : undefined;
-      const onSaveEdit = msg.isUser
-        ? (newMessage: string) => {
-            saveEdit(idx, newMessage);
-          }
-        : undefined;
-      
-      return {
-        msg,
-        onRegenerate,
-        onEditUser,
-        onCancelEdit,
-        onSaveEdit
-      };
-    });
-  }, [messages]);
-
   const handleSendMessage = useCallback(async (message: string, options?: { echoUser?: boolean; insertAtIndex?: number; force?: boolean }) => {
     if (!message.trim() || (isSending && !options?.force)) return;
     
@@ -350,7 +289,7 @@ const Index = () => {
         'Content-Type': 'application/json',
       };
       
-      // Check if user is a real authenticated user (not the test token)
+      // Check if user is a real authenticated user (not a guest)
       const isAuthenticatedUser = token && token !== 'test-token' && !isGuest;
       
       // Only add Authorization header if we have a real token (not the test token)
@@ -507,7 +446,7 @@ const Index = () => {
       setShowTyping(false);
       activeAbortRef.current = null;
     }
-  }, [isSending, manualIP, sessionId, locationInfo, token, isGuest, userLanguage, messages]);
+  }, [isSending, manualIP, sessionId, locationInfo, token, isGuest]);
 
   const toggleSidebar = useCallback(() => {
     setIsSidebarOpen(prev => !prev);
@@ -569,19 +508,53 @@ const Index = () => {
           }}
         >
           <div className="max-w-4xl mx-auto px-4 py-6">
-            {processedMessages.map(({ msg, onRegenerate, onEditUser, onCancelEdit, onSaveEdit }, idx) => (
-              <div key={msg.id} className="mb-6">
-                <ChatMessage 
-                  message={msg.message} 
-                  isUser={msg.isUser} 
-                  onRegenerate={onRegenerate}
-                  onEditUser={onEditUser}
-                  onCancelEdit={onCancelEdit}
-                  onSaveEdit={onSaveEdit}
-                  isEditing={editing?.index === idx}
-                />
-              </div>
-            ))}
+            {messages.map((msg, idx) => {
+              const onRegenerate = !msg.isUser
+                ? () => {
+                    // find the nearest preceding user message
+                    for (let i = idx - 1; i >= 0; i--) {
+                      if (messages[i].isUser) {
+                        // remove current bot message and regenerate in its place without echoing user
+                        setMessages(prev => {
+                          const arr = [...prev];
+                          arr.splice(idx, 1);
+                          return arr;
+                        });
+                        handleSendMessage(messages[i].message, { echoUser: false, insertAtIndex: idx, force: true });
+                        break;
+                      }
+                    }
+                  }
+                : undefined;
+              const onEditUser = msg.isUser
+                ? () => {
+                    setEditing({ index: idx, text: msg.message });
+                  }
+                : undefined;
+              const onCancelEdit = msg.isUser
+                ? () => {
+                    cancelEdit();
+                  }
+                : undefined;
+              const onSaveEdit = msg.isUser
+                ? (newMessage: string) => {
+                    saveEdit(idx, newMessage);
+                  }
+                : undefined;
+              return (
+                <div key={msg.id} className="mb-6">
+                  <ChatMessage 
+                    message={msg.message} 
+                    isUser={msg.isUser} 
+                    onRegenerate={onRegenerate}
+                    onEditUser={onEditUser}
+                    onCancelEdit={onCancelEdit}
+                    onSaveEdit={onSaveEdit}
+                    isEditing={editing?.index === idx}
+                  />
+                </div>
+              );
+            })}
             {/* Show typing indicator when AI is responding and before first token */}
             {showTyping && (
               <div className="mb-6">
